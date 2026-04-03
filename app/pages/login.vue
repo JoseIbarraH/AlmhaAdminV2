@@ -23,6 +23,19 @@ function toggleTheme() {
   colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
 }
 
+const validate = (state: any) => {
+  const errors = []
+  if (!state.email) {
+    errors.push({ name: 'email', message: 'El correo electrónico es obligatorio' })
+  } else if (!/^\S+@\S+\.\S+$/.test(state.email)) {
+    errors.push({ name: 'email', message: 'Introduce un correo electrónico válido' })
+  }
+  if (!state.password) {
+    errors.push({ name: 'password', message: 'La contraseña es obligatoria' })
+  }
+  return errors
+}
+
 async function onSubmit() {
   loading.value = true
   try {
@@ -31,13 +44,7 @@ async function onSubmit() {
       state.rememberMe
     )
     if (success) {
-      toast.add({
-        title: '¡Bienvenido de nuevo!',
-        description: 'Has iniciado sesión correctamente.',
-        color: 'success',
-        icon: 'i-heroicons-check-circle'
-      })
-      navigateTo('/')
+      navigateTo('/dashboard')
     } else {
       toast.add({
         title: 'Error de acceso',
@@ -131,7 +138,7 @@ async function onSubmit() {
           </div>
 
           <!-- Form -->
-          <UForm :state="state" v-auto-animate class="form-body" @submit="onSubmit">
+          <UForm :state="state" :validate="validate" v-auto-animate class="form-body" @submit="onSubmit">
             <!-- Email -->
             <UFormField name="email" class="field-wrap">
               <template #label>
@@ -139,6 +146,9 @@ async function onSubmit() {
               </template>
               <UInput v-model="state.email" placeholder="correo@ejemplo.com" icon="i-heroicons-envelope" size="xl"
                 variant="subtle" class="w-full" />
+              <template #error="{ error }">
+                <span class="error-text">{{ error }}</span>
+              </template>
             </UFormField>
 
             <!-- Password -->
@@ -157,6 +167,9 @@ async function onSubmit() {
                     @click="showPassword = !showPassword" />
                 </template>
               </UInput>
+              <template #error="{ error }">
+                <span class="error-text">{{ error }}</span>
+              </template>
             </UFormField>
 
             <!-- Remember me -->
@@ -624,7 +637,8 @@ async function onSubmit() {
 }
 
 .field-wrap {
-  margin-bottom: 2px;
+  position: relative;
+  padding-bottom: 18px;
 }
 
 .field-label {
@@ -722,6 +736,66 @@ async function onSubmit() {
   font-size: 11px !important;
   font-weight: 300 !important;
   letter-spacing: 0.03em;
+  color: rgba(30, 25, 15, 0.55) !important;
+}
+
+:root.dark .custom-check :deep(label) {
+  color: rgba(240, 236, 228, 0.5) !important;
+}
+
+.custom-check :deep([data-slot="control"]) {
+  border: 1.5px solid rgba(120, 95, 35, 0.4) !important;
+  border-radius: 4px !important;
+  width: 16px !important;
+  height: 16px !important;
+  background: rgba(160, 130, 60, 0.04) !important;
+}
+
+:root.dark .custom-check :deep([data-slot="control"]) {
+  border-color: rgba(212, 175, 55, 0.45) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.custom-check :deep([data-state="checked"] [data-slot="control"]),
+.custom-check :deep([data-slot="control"][data-state="checked"]) {
+  background: #a07c28 !important;
+  border-color: #a07c28 !important;
+}
+
+:root.dark .custom-check :deep([data-state="checked"] [data-slot="control"]),
+:root.dark .custom-check :deep([data-slot="control"][data-state="checked"]) {
+  background: #d4af37 !important;
+  border-color: #d4af37 !important;
+}
+
+/* ── Error styling ── */
+.error-text {
+  position: absolute;
+  bottom: 0;
+  left: 2px;
+  font-size: 10px;
+  font-weight: 500;
+  color: #ef4444;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  animation: error-in 0.2s ease-out;
+}
+
+@keyframes error-in {
+  from { opacity: 0; transform: translateY(-2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+:root.dark .error-text {
+  color: #f87171;
+}
+
+.form-body :deep([data-slot="error"]) {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 /* ── Submit button ── */

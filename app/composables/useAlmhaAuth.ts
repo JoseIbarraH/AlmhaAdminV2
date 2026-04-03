@@ -15,14 +15,10 @@ export const useAlmhaAuth = () => {
         body: credentials,
       }) as any;
 
-      if (response.token) {
-        token.value = response.token;
-        if (!rememberMe) {
-          // If NOT remember me, ideally we'd set a session cookie, 
-          // but useCookie doesn't allow changing options dynamically easily.
-          // For now, persistent is fine or the user can adjust.
-        }
-        user.value = response.user;
+      if (response.access_token) {
+        token.value = response.access_token;
+        // Fetch user data after setting the token
+        await fetchUser();
         return true;
       }
       return false;
