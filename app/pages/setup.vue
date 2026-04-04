@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useApi } from '../composables/useApi'
-import logoImg from '../assets/images/logo.png'
+import logoDarkImg from '../assets/images/logo.png'
+import logoLightImg from '../assets/images/logo2.png'
 
 definePageMeta({
   layout: false
@@ -8,6 +9,13 @@ definePageMeta({
 
 const toast = useToast()
 const colorMode = useColorMode()
+const config = useRuntimeConfig()
+
+const currentLogo = computed(() => {
+  return colorMode.value === 'dark' ? logoDarkImg : logoLightImg
+})
+
+
 
 const state = reactive({
   name: '',
@@ -89,10 +97,18 @@ async function onSubmit() {
             <span class="corner tr" />
             <span class="corner bl" />
             <span class="corner br" />
-            <img :src="logoImg" alt="Almha" class="logo-img" />
+            <ClientOnly>
+              <img :src="currentLogo" alt="Almha" class="logo-img" />
+              <template #fallback>
+                <img :src="logoDarkImg" alt="Almha" class="logo-img" />
+              </template>
+            </ClientOnly>
           </div>
-          <span class="brand-name">Almha Admin</span>
+          <span class="brand-name">
+            {{ config.public.appName }} {{ config.public.appSuffix }}
+          </span>
         </div>
+
 
         <!-- Center: tagline -->
         <div class="left-center">
@@ -116,12 +132,21 @@ async function onSubmit() {
       <!-- ══ RIGHT PANEL — form ══ -->
       <div class="login-right">
         <!-- Theme toggle -->
-        <button class="theme-toggle" type="button" aria-label="Cambiar tema" @click="toggleTheme">
-          <span class="toggle-track">
-            <span class="toggle-knob" />
-          </span>
-          <span class="toggle-label">{{ colorMode.value === 'dark' ? 'Dark' : 'Light' }}</span>
-        </button>
+        <ClientOnly>
+          <button class="theme-toggle" type="button" aria-label="Cambiar tema" @click="toggleTheme">
+            <span class="toggle-track">
+              <span class="toggle-knob" />
+            </span>
+            <span class="toggle-label">{{ colorMode.value === 'dark' ? 'Dark' : 'Light' }}</span>
+          </button>
+          <template #fallback>
+            <div class="theme-toggle">
+              <span class="toggle-track"><span class="toggle-knob" /></span>
+              <span class="toggle-label">Modo</span>
+            </div>
+          </template>
+        </ClientOnly>
+
 
         <!-- Form wrapper — vertically centered -->
         <div class="form-wrapper">
@@ -147,7 +172,7 @@ async function onSubmit() {
 
           <!-- Form -->
           <UForm ref="formRef" :state="state" :validate="validate" v-auto-animate class="form-body" @submit="onSubmit">
-            
+
             <!-- Full Name -->
             <UFormField name="name" class="field-wrap">
               <template #label>
@@ -240,7 +265,7 @@ async function onSubmit() {
             </UButton>
           </UForm>
 
-          
+
         </div>
       </div>
 
@@ -348,6 +373,7 @@ async function onSubmit() {
   height: 42px;
   object-fit: contain;
 }
+
 
 .corner {
   position: absolute;
@@ -765,8 +791,15 @@ async function onSubmit() {
 }
 
 @keyframes error-in {
-  from { opacity: 0; transform: translateY(-2px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 :root.dark .error-text {

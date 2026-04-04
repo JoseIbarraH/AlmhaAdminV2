@@ -2,20 +2,17 @@
 const { token } = useAlmhaAuth()
 
 definePageMeta({
-  middleware: [
-    function (to, from) {
-      const { token } = useAlmhaAuth()
-      if (!token.value) {
-        return navigateTo('/login')
-      }
-    }
-  ]
+  middleware: ['auth']
 })
+
+// Always redirect to dashboard if the user reaches this page (which requires auth)
+navigateTo('/dashboard')
+
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4">
-    <UCard class="w-full max-w-2xl text-center shadow-xl">
+  <div class="space-y-6">
+    <UCard class="text-center shadow-md">
       <template #header>
         <div class="flex items-center justify-center gap-3 py-2">
           <UIcon name="i-heroicons-sparkles" class="w-8 h-8 text-primary-500" />
@@ -37,13 +34,8 @@ definePageMeta({
             ¡Ya casi estamos listos!
           </h2>
           <p class="mt-2 text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-            El dashboard principal está under construction. Pronto verás aquí tus analíticas y gestión.
+            El dashboard principal está en construcción. Pronto verás aquí tus analíticas y gestión.
           </p>
-        </div>
-
-        <div class="flex gap-4 justify-center">
-          <UButton icon="i-heroicons-arrow-right-on-rectangle" color="neutral" variant="ghost" label="Cerrar Sesión"
-            @click="useAlmhaAuth().logout()" />
         </div>
       </div>
 
