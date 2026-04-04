@@ -462,7 +462,7 @@ const handleRefresh = () => {
   color: #1e293b;
   margin-bottom: 1rem;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   transition: color 0.2s;
@@ -478,7 +478,7 @@ const handleRefresh = () => {
   line-height: 1.6;
   margin-bottom: 2rem;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   flex: 1;
