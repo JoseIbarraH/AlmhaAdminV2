@@ -1,8 +1,10 @@
 <script setup lang="ts">
-const navigationItems = [
-  { label: 'Dashboard', icon: 'i-heroicons-home', to: '/dashboard' },
-  { label: 'Blog', icon: 'i-heroicons-document-text', to: '/blogs' },
-]
+const { t } = useI18n()
+
+const navigationItems = computed(() => [
+  { label: t('nav.dashboard'), icon: 'i-heroicons-home', to: '/dashboard' },
+  { label: t('nav.blog'), icon: 'i-heroicons-document-text', to: '/blogs' },
+])
 </script>
 
 <template>

@@ -12,6 +12,15 @@ export default defineNuxtConfig({
     '@nuxtjs/i18n'
   ],
 
+  i18n: {
+    locales: [
+      { code: 'en', name: 'English', file: 'en.json' },
+      { code: 'es', name: 'Español', file: 'es.json' }
+    ],
+    defaultLocale: 'es',
+    strategy: 'no_prefix'
+  },
+
   runtimeConfig: {
     public: {
       apiBase: '', // Provided by NUXT_PUBLIC_API_BASE

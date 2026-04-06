@@ -8,14 +8,13 @@ definePageMeta({
 })
 
 const toast = useToast()
+const { t } = useI18n()
 const colorMode = useColorMode()
 const config = useRuntimeConfig()
 
 const currentLogo = computed(() => {
   return colorMode.value === 'dark' ? logoDarkImg : logoLightImg
 })
-
-
 
 const state = reactive({
   name: '',
@@ -28,29 +27,25 @@ const loading = ref(false)
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 
-function toggleTheme() {
-  colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
-}
-
 const formRef = ref()
 
 const validate = (state: any) => {
   const errors = []
-  if (!state.name) errors.push({ name: 'name', message: 'El nombre completo es obligatorio' })
+  if (!state.name) errors.push({ name: 'name', message: t('auth.setup.errors.name_required') })
   if (!state.email) {
-    errors.push({ name: 'email', message: 'El correo electrónico es obligatorio' })
+    errors.push({ name: 'email', message: t('auth.setup.errors.email_required') })
   } else if (!/^\S+@\S+\.\S+$/.test(state.email)) {
-    errors.push({ name: 'email', message: 'Introduce un correo electrónico válido' })
+    errors.push({ name: 'email', message: t('auth.setup.errors.email_invalid') })
   }
   if (!state.password) {
-    errors.push({ name: 'password', message: 'La contraseña es obligatoria' })
+    errors.push({ name: 'password', message: t('auth.setup.errors.password_required') })
   } else if (state.password.length < 8) {
-    errors.push({ name: 'password', message: 'La contraseña debe tener al menos 8 caracteres' })
+    errors.push({ name: 'password', message: t('auth.setup.errors.password_min') })
   }
   if (!state.password_confirmation) {
-    errors.push({ name: 'password_confirmation', message: 'Confirma tu contraseña' })
+    errors.push({ name: 'password_confirmation', message: t('auth.setup.errors.confirm_required') })
   } else if (state.password !== state.password_confirmation) {
-    errors.push({ name: 'password_confirmation', message: 'Las contraseñas no coinciden' })
+    errors.push({ name: 'password_confirmation', message: t('auth.setup.errors.passwords_mismatch') })
   }
   return errors
 }
@@ -64,8 +59,8 @@ async function onSubmit() {
     })
 
     toast.add({
-      title: '¡Sistema Inicializado!',
-      description: 'La instancia de Almha ha sido configurada. Ahora puedes iniciar sesión.',
+      title: t('auth.setup.success.title'),
+      description: t('auth.setup.success.description'),
       color: 'success',
       icon: 'i-heroicons-check-circle'
     })
@@ -73,8 +68,8 @@ async function onSubmit() {
     navigateTo('/login')
   } catch (error: any) {
     toast.add({
-      title: 'Fallo en la inicialización',
-      description: error.data?.message || 'Verifica los datos (la contraseña debe tener al menos 8 caracteres).',
+      title: t('auth.setup.fail.title'),
+      description: error.data?.message || t('auth.setup.fail.description'),
       color: 'error',
       icon: 'i-heroicons-exclamation-triangle'
     })
@@ -104,19 +99,20 @@ async function onSubmit() {
               </template>
             </ClientOnly>
           </div>
-          <span class="brand-name">
-            {{ config.public.appName }} {{ config.public.appSuffix }}
-          </span>
+          <div class="brand-info">
+            <span class="brand-name">{{ config.public.appName }}</span>
+            <span class="brand-suffix">{{ config.public.appSuffix }}</span>
+          </div>
         </div>
 
 
         <!-- Center: tagline -->
         <div class="left-center">
           <h2 class="tagline">
-            Comienzo del<br /><em>control.</em>
+            {{ $t('auth.setup.tagline.title') }}<br /><em>{{ $t('auth.setup.tagline.titleAccent') }}</em>
           </h2>
           <p class="tagline-desc">
-            Configura tu instancia maestra para empezar a gestionar tus operaciones con máxima precisión y seguridad.
+            {{ $t('auth.setup.tagline.description') }}
           </p>
         </div>
 
@@ -124,28 +120,15 @@ async function onSubmit() {
         <div class="left-bottom">
           <div class="accent-line" />
           <p class="quote-text">
-            "La base de cualquier gran plataforma es su configuración inicial."
+            {{ $t('auth.setup.quote') }}
           </p>
         </div>
       </div>
 
       <!-- ══ RIGHT PANEL — form ══ -->
       <div class="login-right">
-        <!-- Theme toggle -->
-        <ClientOnly>
-          <button class="theme-toggle" type="button" aria-label="Cambiar tema" @click="toggleTheme">
-            <span class="toggle-track">
-              <span class="toggle-knob" />
-            </span>
-            <span class="toggle-label">{{ colorMode.value === 'dark' ? 'Dark' : 'Light' }}</span>
-          </button>
-          <template #fallback>
-            <div class="theme-toggle">
-              <span class="toggle-track"><span class="toggle-knob" /></span>
-              <span class="toggle-label">Modo</span>
-            </div>
-          </template>
-        </ClientOnly>
+        <!-- Theme & Language Picker -->
+        <ThemeLanguagePicker />
 
 
         <!-- Form wrapper — vertically centered -->
@@ -166,8 +149,8 @@ async function onSubmit() {
             <div class="eyebrow">
               <span class="eyebrow-line" />
             </div>
-            <h3 class="form-title">Configuración Inicial</h3>
-            <p class="form-sub">Crea la cuenta de administrador principal.</p>
+            <h3 class="form-title">{{ $t('auth.setup.title') }}</h3>
+            <p class="form-sub">{{ $t('auth.setup.subtitle') }}</p>
           </div>
 
           <!-- Form -->
@@ -177,10 +160,10 @@ async function onSubmit() {
             <UFormField name="name" class="field-wrap">
               <template #label>
                 <div class="field-label-row">
-                  <span class="field-label">Nombre Completo</span>
+                  <span class="field-label">{{ $t('auth.setup.nameLabel') }}</span>
                 </div>
               </template>
-              <UInput v-model="state.name" placeholder="John Doe" icon="i-heroicons-user" size="xl" variant="subtle"
+              <UInput v-model="state.name" :placeholder="$t('auth.setup.namePlaceholder')" icon="i-heroicons-user" size="xl" variant="subtle"
                 class="w-full" />
               <template #error="{ error }">
                 <span class="error-text">{{ error }}</span>
@@ -191,10 +174,10 @@ async function onSubmit() {
             <UFormField name="email" class="field-wrap">
               <template #label>
                 <div class="field-label-row">
-                  <span class="field-label">Correo Electrónico</span>
+                  <span class="field-label">{{ $t('auth.setup.emailLabel') }}</span>
                 </div>
               </template>
-              <UInput v-model="state.email" placeholder="admin@almha.com" icon="i-heroicons-envelope" size="xl"
+              <UInput v-model="state.email" :placeholder="$t('auth.setup.emailPlaceholder')" icon="i-heroicons-envelope" size="xl"
                 variant="subtle" class="w-full" />
               <template #error="{ error }">
                 <span class="error-text">{{ error }}</span>
@@ -207,7 +190,7 @@ async function onSubmit() {
               <UFormField name="password" class="field-wrap">
                 <template #label>
                   <div class="field-label-row">
-                    <span class="field-label">Contraseña</span>
+                    <span class="field-label">{{ $t('auth.setup.passwordLabel') }}</span>
                   </div>
                 </template>
                 <UInput v-model="state.password" :type="showPassword ? 'text' : 'password'"
@@ -229,7 +212,7 @@ async function onSubmit() {
               <UFormField name="password_confirmation" class="field-wrap">
                 <template #label>
                   <div class="field-label-row">
-                    <span class="field-label">Confirmar</span>
+                    <span class="field-label">{{ $t('auth.setup.confirmLabel') }}</span>
                   </div>
                 </template>
                 <UInput v-model="state.password_confirmation" :type="showConfirmPassword ? 'text' : 'password'"
@@ -254,14 +237,14 @@ async function onSubmit() {
                 <UIcon name="i-heroicons-shield-check" class="alert-icon" />
               </div>
               <div class="alert-content">
-                <span class="alert-title">Seguridad del Sistema</span>
-                <p class="alert-text">Este asistente se desactivará automáticamente tras la inicialización.</p>
+                <span class="alert-title">{{ $t('auth.setup.security.title') }}</span>
+                <p class="alert-text">{{ $t('auth.setup.security.description') }}</p>
               </div>
             </div>
 
             <!-- Submit -->
             <UButton type="submit" block size="xl" :loading="loading" class="submit-btn mt-2">
-              Inicializar Plataforma
+              {{ $t('auth.setup.submit') }}
             </UButton>
           </UForm>
 
@@ -415,18 +398,38 @@ async function onSubmit() {
   border-radius: 0 0 4px 0;
 }
 
+.brand-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .brand-name {
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.2em;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(120, 95, 35, 0.6);
-  margin-top: 12px;
-  display: block;
+  color: #1a1814;
+  line-height: 1.2;
+  transition: color 0.3s;
 }
 
 :root.dark .brand-name {
-  color: rgba(212, 175, 55, 0.5);
+  color: #f0ece4;
+}
+
+.brand-suffix {
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(120, 95, 35, 0.7);
+  margin-top: 2px;
+  transition: color 0.3s;
+}
+
+:root.dark .brand-suffix {
+  color: rgba(212, 175, 55, 0.6);
 }
 
 .left-center {
@@ -517,64 +520,6 @@ async function onSubmit() {
 .form-wrapper {
   width: 100%;
   max-width: 400px;
-}
-
-/* ── Theme toggle ── */
-.theme-toggle {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  z-index: 10;
-}
-
-.toggle-track {
-  width: 34px;
-  height: 18px;
-  border-radius: 9px;
-  border: 0.5px solid #d0ccc5;
-  background: #ede9e2;
-  position: relative;
-  display: block;
-}
-
-:root.dark .toggle-track {
-  background: #222;
-  border-color: #333;
-}
-
-.toggle-knob {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #ffffff;
-  transition: transform 0.25s;
-}
-
-:root.dark .toggle-knob {
-  transform: translateX(16px);
-  background: #d4af37;
-}
-
-.toggle-label {
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgba(30, 25, 15, 0.35);
-}
-
-:root.dark .toggle-label {
-  color: rgba(240, 236, 228, 0.3);
 }
 
 /* ── Form header ── */
@@ -724,22 +669,21 @@ async function onSubmit() {
 }
 
 /* ── UInput override (Copied from login.vue) ── */
-.form-body :deep([data-slot="root"]) {
-  width: 100%;
-  position: relative !important;
-}
-
 .form-body :deep([data-slot="leading"]) {
-  left: 0.75rem !important;
+  left: 0.85rem !important;
+  right: auto !important;
   top: 0 !important;
   bottom: 0 !important;
   position: absolute !important;
   display: flex !important;
-  align-items: center;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 20px !important;
 }
 
 .form-body :deep([data-slot="trailing"]) {
-  right: 0.75rem !important;
+  right: 0.85rem !important;
+  left: auto !important;
   top: 0 !important;
   bottom: 0 !important;
   position: absolute !important;
@@ -750,37 +694,37 @@ async function onSubmit() {
 .form-body :deep(input) {
   padding-left: 2.85rem !important;
   padding-right: 2.85rem !important;
-  background: rgba(30, 25, 15, 0.02) !important;
 }
 
 :root.dark .form-body :deep(input) {
   color: #f0ece4 !important;
-  background: rgba(255, 255, 255, 0.02) !important;
 }
 
 :root.dark .form-body :deep(input::placeholder) {
   color: rgba(240, 236, 228, 0.4) !important;
 }
 
-/* ── Field wrap with reserved error space ── */
+:root.dark .form-body :deep([data-slot="leading"]),
+:root.dark .form-body :deep([data-slot="trailing"]) {
+  color: rgba(240, 236, 228, 0.5) !important;
+}
+
 .field-wrap {
   position: relative;
-  padding-bottom: 18px;
+  padding-bottom: 22px;
 }
 
 .field-label-row {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 8px;
-  position: relative;
   width: 100%;
-  margin-bottom: 6px;
 }
 
-/* ── ERROR STYLING ── */
+/* ── Error styling ── */
 .error-text {
   position: absolute;
-  bottom: 0;
+  top: calc(100% - 18px);
   left: 2px;
   font-size: 10px;
   font-weight: 500;
@@ -814,48 +758,72 @@ async function onSubmit() {
   padding: 0 !important;
 }
 
-/* ── Submit button (Copied from login.vue) ── */
+/* ── Submit button ── */
 .submit-btn {
   font-family: 'DM Sans', sans-serif !important;
   font-size: 11px !important;
   font-weight: 500 !important;
   letter-spacing: 0.16em !important;
   text-transform: uppercase !important;
+  margin-top: 4px;
   background: #a07c28 !important;
   color: #ffffff !important;
-  border-radius: 8px !important;
+  border: none !important;
   padding: 14px 24px !important;
+  border-radius: 8px !important;
+  cursor: pointer;
+  transition: background 0.25s, box-shadow 0.25s, transform 0.15s;
   box-shadow: 0 4px 16px rgba(160, 124, 40, 0.25);
-  transition: all 0.25s;
 }
 
 .submit-btn:hover {
   background: #8a6b22 !important;
+  box-shadow: 0 6px 20px rgba(160, 124, 40, 0.35);
   transform: translateY(-1px);
+}
+
+.submit-btn:active {
+  transform: translateY(0) scale(0.98);
 }
 
 :root.dark .submit-btn {
   background: #d4af37 !important;
   color: #0a0a0a !important;
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.2);
 }
 
-/* ── Footer ── */
-.form-footer {
-  margin-top: 22px;
-  padding-top: 18px;
-  border-top: 0.5px solid rgba(0, 0, 0, 0.05);
-  text-align: center;
+:root.dark .submit-btn:hover {
+  background: #c9a42f !important;
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3);
 }
 
-.footer-text {
-  font-size: 10px;
-  font-weight: 300;
-  color: rgba(30, 25, 15, 0.28);
+/* ── Mobile logo ── */
+.mobile-logo {
+  display: none;
+  justify-content: center;
+  margin-bottom: 24px;
 }
 
-.footer-contact {
-  color: rgba(120, 95, 35, 0.6);
-  font-weight: 500;
-  margin-left: 4px;
+@media (max-width: 1024px) {
+  .mobile-logo {
+    display: flex;
+  }
+}
+
+.logo-box-sm {
+  width: 52px;
+  height: 52px;
+  border: 1px solid rgba(160, 130, 60, 0.3);
+  border-radius: 10px;
+  background: rgba(80, 65, 30, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+:root.dark .logo-box-sm {
+  border-color: rgba(212, 175, 55, 0.3);
+  background: rgba(212, 175, 55, 0.08);
 }
 </style>

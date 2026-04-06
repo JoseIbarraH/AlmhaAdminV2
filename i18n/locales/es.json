@@ -1,0 +1,151 @@
+{
+  "nav": {
+    "dashboard": "Tablero",
+    "blog": "Blog",
+    "logout": "Cerrar Sesión",
+    "theme": "Cambiar tema",
+    "language": "Idioma",
+    "spanish": "Español",
+    "english": "Inglés",
+    "admin": "Administrador",
+    "super_admin": "Super Admin"
+  },
+  "blogs": {
+    "header": {
+      "title": "Gestión de {content}",
+      "content": "Contenido",
+      "description": "Publica y edita los artículos que verán tus pacientes y seguidores.",
+      "newEntry": "Nueva Entrada",
+      "refresh": "Actualizar"
+    },
+    "toolbar": {
+      "searchPlaceholder": "Buscar artículos por título...",
+      "filters": {
+        "all": "Todos los estados",
+        "published": "Publicados",
+        "drafts": "Borradores"
+      }
+    },
+    "status": {
+      "published": "Publicado",
+      "draft": "Borrador",
+      "scheduled": "Programado",
+      "unknown": "Estado desconocido"
+    },
+    "date": {
+      "empty": "Sin fecha",
+      "format": "es-ES"
+    },
+    "card": {
+      "noTitle": "Sin título",
+      "actions": {
+        "edit": "Editar",
+        "delete": "Eliminar"
+      },
+      "author": {
+        "by": "Por"
+      }
+    },
+    "empty": {
+      "title": "No se encontraron entradas",
+      "description": "Intenta con otros términos o crea un contenido nuevo.",
+      "action": "Comenzar ahora"
+    },
+    "pagination": {
+      "info": "Página {current} de {total}",
+      "prev": "Anterior",
+      "next": "Siguiente"
+    },
+    "form": {
+      "title": "Título del Artículo",
+      "titlePlaceholder": "Ingresa un título cautivador...",
+      "content": "Contenido del Artículo",
+      "settings": "Configuración",
+      "category": "Categoría",
+      "selectCategory": "Seleccionar categoría",
+      "writer": "Autor / Redactor",
+      "writerPlaceholder": "Nombre del autor",
+      "baseLang": "Idioma del contenido",
+      "featuredImage": "Imagen Destacada",
+      "clickToUpload": "Haz clic para subir imagen",
+      "publish": "Publicar Artículo",
+      "update": "Actualizar Artículo",
+      "cancel": "Cancelar",
+      "createTitle": "Nueva Entrada de Blog",
+      "editTitle": "Editar Entrada de Blog",
+      "createDesc": "Crea contenido relevante para tu comunidad.",
+      "editDesc": "Actualiza la información y mejora el alcance de tu post.",
+      "successCreate": "Artículo publicado exitosamente",
+      "successUpdate": "Artículo actualizado exitosamente",
+      "error": "Ocurrió un error al procesar la solicitud"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Iniciar Sesión",
+      "subtitle": "Introduce tus credenciales para continuar.",
+      "email": "Correo Electrónico",
+      "password": "Contraseña",
+      "remember_me": "Mantener sesión iniciada",
+      "button": "Acceder",
+      "eyebrow": "Acceso seguro",
+      "footer": {
+        "text": "¿No tienes cuenta?",
+        "contact": "Contacta con el administrador"
+      },
+      "tagline": {
+        "title": "Gestión de",
+        "titleAccent": "alto nivel.",
+        "description": "Una plataforma diseñada para quienes exigen precisión, velocidad y control absoluto sobre sus operaciones."
+      },
+      "quote": "\"Almha ha transformado la manera en que gestionamos nuestros proyectos.\"",
+      "errors": {
+        "email_required": "El correo electrónico es obligatorio",
+        "email_invalid": "Introduce un correo electrónico válido",
+        "password_required": "La contraseña es obligatoria",
+        "invalid_credentials": "Credenciales inválidas.",
+        "server_error": "No se pudo conectar con el servidor.",
+        "login_error": "Error de acceso",
+        "system_error": "Error del servidor"
+      }
+    },
+    "setup": {
+      "title": "Configuración Inicial",
+      "subtitle": "Crea la cuenta de administrador principal.",
+      "nameLabel": "Nombre Completo",
+      "namePlaceholder": "Nombre y apellido",
+      "emailLabel": "Correo Electrónico",
+      "emailPlaceholder": "admin{'@'}almha.com",
+      "passwordLabel": "Contraseña",
+      "confirmLabel": "Confirmar",
+      "submit": "Inicializar Plataforma",
+      "tagline": {
+        "title": "Comienzo del",
+        "titleAccent": "control.",
+        "description": "Configura tu instancia maestra para empezar a gestionar tus operaciones con máxima precisión y seguridad."
+      },
+      "quote": "\"La base de cualquier gran plataforma es su configuración inicial.\"",
+      "security": {
+        "title": "Seguridad del Sistema",
+        "description": "Este asistente se desactivará automáticamente tras la inicialización."
+      },
+      "errors": {
+        "name_required": "El nombre completo es obligatorio",
+        "email_required": "El correo electrónico es obligatorio",
+        "email_invalid": "Introduce un correo electrónico válido",
+        "password_required": "La contraseña es obligatoria",
+        "password_min": "La contraseña debe tener al menos 8 caracteres",
+        "confirm_required": "Confirma tu contraseña",
+        "passwords_mismatch": "Las contraseñas no coinciden"
+      },
+      "success": {
+        "title": "¡Sistema Inicializado!",
+        "description": "La instancia de Almha ha sido configurada. Ahora puedes iniciar sesión."
+      },
+      "fail": {
+        "title": "Fallo en la inicialización",
+        "description": "Verifica los datos (la contraseña debe tener al menos 8 caracteres)."
+      }
+    }
+  }
+}

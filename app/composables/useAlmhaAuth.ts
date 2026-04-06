@@ -11,7 +11,6 @@ export const useAlmhaAuth = () => {
   const token = useCookie<string | null>('auth_token', {
     watch: true,
     sameSite: 'lax',
-    maxAge: 60 * 60 * 24 * 30 // 30 days
   });
   const user = useState<User | null>('user', () => null);
 
@@ -20,12 +19,28 @@ export const useAlmhaAuth = () => {
     try {
       const response = await useApi('/auth/login', {
         method: 'POST',
-        body: credentials,
+        body: {
+          ...credentials,
+          remember_me: rememberMe
+        },
       }) as any;
 
       if (response.access_token) {
-        token.value = response.access_token;
-        // Fetch user data using the token we just got, explicitly
+        // Set cookie with dynamic maxAge
+        const cookieOptions: any = {
+          watch: true,
+          sameSite: 'lax',
+        };
+        
+        if (rememberMe) {
+          cookieOptions.maxAge = 60 * 60 * 24 * 30; // 30 days
+        }
+
+        const dynamicToken = useCookie('auth_token', cookieOptions);
+        dynamicToken.value = response.access_token;
+        // token.value will update automatically because it's watching 'auth_token'
+
+        // Fetch user data
         await fetchUser(response.access_token);
         return true;
       }

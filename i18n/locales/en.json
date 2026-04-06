@@ -1,0 +1,151 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "blog": "Blog",
+    "logout": "Logout",
+    "theme": "Change theme",
+    "language": "Language",
+    "spanish": "Spanish",
+    "english": "English",
+    "admin": "Administrator",
+    "super_admin": "Super Admin"
+  },
+  "blogs": {
+    "header": {
+      "title": "Content {content}",
+      "content": "Management",
+      "description": "Publish and edit the articles that your patients and followers will see.",
+      "newEntry": "New Entry",
+      "refresh": "Refresh"
+    },
+    "toolbar": {
+      "searchPlaceholder": "Search articles by title...",
+      "filters": {
+        "all": "All statuses",
+        "published": "Published",
+        "drafts": "Drafts"
+      }
+    },
+    "status": {
+      "published": "Published",
+      "draft": "Draft",
+      "scheduled": "Scheduled",
+      "unknown": "Unknown"
+    },
+    "date": {
+      "empty": "No date",
+      "format": "en-US"
+    },
+    "card": {
+      "noTitle": "No title",
+      "actions": {
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "author": {
+        "by": "By"
+      }
+    },
+    "empty": {
+      "title": "No entries found",
+      "description": "Try with other terms or create new content.",
+      "action": "Start now"
+    },
+    "pagination": {
+      "info": "Page {current} of {total}",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "form": {
+      "title": "Article Title",
+      "titlePlaceholder": "Enter a catchy title...",
+      "content": "Article Content",
+      "settings": "Settings",
+      "category": "Category",
+      "selectCategory": "Select category",
+      "writer": "Author / Writer",
+      "writerPlaceholder": "Author name",
+      "baseLang": "Content Language",
+      "featuredImage": "Featured Image",
+      "clickToUpload": "Click to upload image",
+      "publish": "Publish Article",
+      "update": "Update Article",
+      "cancel": "Cancel",
+      "createTitle": "New Blog Entry",
+      "editTitle": "Edit Blog Entry",
+      "createDesc": "Create relevant content for your community.",
+      "editDesc": "Update the information and improve the reach of your post.",
+      "successCreate": "Article published successfully",
+      "successUpdate": "Article updated successfully",
+      "error": "An error occurred while processing the request"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Sign In",
+      "subtitle": "Enter your credentials to continue.",
+      "email": "Email Address",
+      "password": "Password",
+      "remember_me": "Keep me logged in",
+      "button": "Access",
+      "eyebrow": "Secure access",
+      "footer": {
+        "text": "Don't have an account?",
+        "contact": "Contact the administrator"
+      },
+      "tagline": {
+        "title": "High-level",
+        "titleAccent": "management.",
+        "description": "A platform designed for those who demand precision, speed, and absolute control over their operations."
+      },
+      "quote": "\"Almha has transformed how we manage our projects.\"",
+      "errors": {
+        "email_required": "Email current is required",
+        "email_invalid": "Enter a valid email address",
+        "password_required": "Password is required",
+        "invalid_credentials": "Invalid credentials.",
+        "server_error": "Could not connect to the server.",
+        "login_error": "Access Error",
+        "system_error": "Server Error"
+      }
+    },
+    "setup": {
+      "title": "Initial Setup",
+      "subtitle": "Create the main administrator account.",
+      "nameLabel": "Full Name",
+      "namePlaceholder": "Jane Doe",
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "admin{'@'}almha.com",
+      "passwordLabel": "Password",
+      "confirmLabel": "Confirm",
+      "submit": "Initialize Platform",
+      "tagline": {
+        "title": "Beginning of",
+        "titleAccent": "control.",
+        "description": "Configure your master instance to start managing your operations with maximum precision and security."
+      },
+      "quote": "\"The foundation of any great platform is its initial configuration.\"",
+      "security": {
+        "title": "System Security",
+        "description": "This assistant will automatically deactivate after initialization."
+      },
+      "errors": {
+        "name_required": "Full name is required",
+        "email_required": "Email address is required",
+        "email_invalid": "Enter a valid email address",
+        "password_required": "Password is required",
+        "password_min": "Password must be at least 8 characters",
+        "confirm_required": "Confirm your password",
+        "passwords_mismatch": "Passwords do not match"
+      },
+      "success": {
+        "title": "System Initialized!",
+        "description": "The Almha instance has been configured. You can now log in."
+      },
+      "fail": {
+        "title": "Initialization failed",
+        "description": "Verify the data (password must be at least 8 characters)."
+      }
+    }
+  }
+}

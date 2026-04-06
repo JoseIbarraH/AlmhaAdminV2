@@ -48,7 +48,7 @@ const { data: response, pending, refresh, error } = await useAsyncData<ApiRespon
   () => useApi<ApiResponse>('/blogs', {
     query: {
       page: page.value,
-      per_page: 9,
+      per_page: 8,
       search: debouncedSearch.value
     }
   }),
@@ -80,16 +80,17 @@ const getStatusClass = (status: string) => {
 
 const getStatusLabel = (status: string) => {
   switch (status) {
-    case 'published': return 'Publicado'
-    case 'draft': return 'Borrador'
-    case 'scheduled': return 'Programado'
+    case 'published': return useI18n().t('blogs.status.published')
+    case 'draft': return useI18n().t('blogs.status.draft')
+    case 'scheduled': return useI18n().t('blogs.status.scheduled')
     default: return status
   }
 }
 
 const formatDate = (dateString: string | null) => {
-  if (!dateString) return 'Sin fecha'
-  return new Date(dateString).toLocaleDateString('es-ES', {
+  const { t, locale } = useI18n()
+  if (!dateString) return t('blogs.date.empty')
+  return new Date(dateString).toLocaleDateString(t('blogs.date.format'), {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
@@ -106,16 +107,20 @@ const handleRefresh = () => {
     <!-- Header -->
     <header class="blogs-header">
       <div class="header-info">
-        <h1 class="header-title">Gestión de <span class="gold">Contenido</span></h1>
-        <p class="header-desc">Publica y edita los artículos que verán tus pacientes y seguidores.</p>
+        <i18n-t keypath="blogs.header.title" tag="h1" class="header-title">
+          <template #content>
+            <span class="gold">{{ $t('blogs.header.content') }}</span>
+          </template>
+        </i18n-t>
+        <p class="header-desc">{{ $t('blogs.header.description') }}</p>
       </div>
       <div class="header-actions">
-        <button class="btn-refresh" :disabled="pending" @click="handleRefresh" title="Actualizar">
+        <button class="btn-refresh" :disabled="pending" @click="handleRefresh" :title="$t('blogs.header.refresh')">
           <UIcon name="i-heroicons-arrow-path" :class="{ 'animate-spin': pending }" class="icon-md" />
         </button>
         <NuxtLink to="/blogs/create" class="btn-primary">
           <UIcon name="i-heroicons-plus" class="icon-md" />
-          <span>Nueva Entrada</span>
+          <span>{{ $t('blogs.header.newEntry') }}</span>
         </NuxtLink>
       </div>
     </header>
@@ -124,19 +129,14 @@ const handleRefresh = () => {
     <div class="blogs-toolbar">
       <div class="search-wrap">
         <UIcon name="i-heroicons-magnifying-glass" class="search-icon" />
-        <input 
-          v-model="searchQuery" 
-          type="text" 
-          placeholder="Buscar artículos por título..." 
-          class="search-input"
-        />
+        <input v-model="searchQuery" type="text" :placeholder="$t('blogs.toolbar.searchPlaceholder')" class="search-input" />
       </div>
       <div class="filters-wrap">
         <div class="custom-select">
           <select class="select-field">
-            <option>Todos los estados</option>
-            <option>Publicados</option>
-            <option>Borradores</option>
+            <option>{{ $t('blogs.toolbar.filters.all') }}</option>
+            <option>{{ $t('blogs.toolbar.filters.published') }}</option>
+            <option>{{ $t('blogs.toolbar.filters.drafts') }}</option>
           </select>
         </div>
       </div>
@@ -166,20 +166,20 @@ const handleRefresh = () => {
             <span class="date">{{ formatDate(blog.publishedAt) }}</span>
           </div>
 
-          <h2 class="card-title">{{ blog.translations?.[0]?.title || 'Sin título' }}</h2>
-          <p class="card-excerpt" v-html="blog.translations?.[0]?.content"></p>
+          <h2 class="card-title">{{ blog.translations?.[0]?.title || $t('blogs.card.noTitle') }}</h2>
+
 
           <footer class="card-footer">
             <div class="card-actions">
-              <NuxtLink :to="`/blogs/${blog.id}/edit`" class="action-btn edit" title="Editar">
+              <NuxtLink :to="`/blogs/${blog.id}/edit`" class="action-btn edit" :title="$t('blogs.card.actions.edit')">
                 <UIcon name="i-heroicons-pencil-square" class="icon-sm" />
               </NuxtLink>
-              <button class="action-btn delete" title="Eliminar">
+              <button class="action-btn delete" :title="$t('blogs.card.actions.delete')">
                 <UIcon name="i-heroicons-trash" class="icon-sm" />
               </button>
             </div>
             <div class="author-info">
-              <span class="by">Por</span>
+              <span class="by">{{ $t('blogs.card.author.by') }}</span>
               <span class="name">{{ blog.writer }}</span>
             </div>
           </footer>
@@ -191,10 +191,10 @@ const handleRefresh = () => {
     <div v-else class="empty-state">
       <div class="empty-box">
         <UIcon name="i-heroicons-document-search" class="icon-empty" />
-        <h3>No se encontraron entradas</h3>
-        <p>Intenta con otros términos o crea un contenido nuevo.</p>
+        <h3>{{ $t('blogs.empty.title') }}</h3>
+        <p>{{ $t('blogs.empty.description') }}</p>
         <div class="mt-8 flex justify-center">
-          <NuxtLink to="/blogs/create" class="btn-primary">Comenzar ahora</NuxtLink>
+          <NuxtLink to="/blogs/create" class="btn-primary">{{ $t('blogs.empty.action') }}</NuxtLink>
         </div>
       </div>
     </div>
@@ -202,22 +202,21 @@ const handleRefresh = () => {
     <!-- Footer -->
     <footer v-if="meta && meta.last_page > 1" class="blogs-footer">
       <div class="page-info">
-        Página <strong>{{ meta.current_page }}</strong> de <strong>{{ meta.last_page }}</strong>
+        <i18n-t keypath="blogs.pagination.info" tag="span">
+          <template #current>
+            <strong>{{ meta.current_page }}</strong>
+          </template>
+          <template #total>
+            <strong>{{ meta.last_page }}</strong>
+          </template>
+        </i18n-t>
       </div>
       <div class="pagination">
-        <button 
-          class="pag-btn" 
-          :disabled="page === 1" 
-          @click="page--"
-        >
-          Anterior
+        <button class="pag-btn" :disabled="page === 1" @click="page--">
+          {{ $t('blogs.pagination.prev') }}
         </button>
-        <button 
-          class="pag-btn" 
-          :disabled="page === meta.last_page" 
-          @click="page++"
-        >
-          Siguiente
+        <button class="pag-btn" :disabled="page === meta.last_page" @click="page++">
+          {{ $t('blogs.pagination.next') }}
         </button>
       </div>
     </footer>
@@ -245,16 +244,30 @@ const handleRefresh = () => {
   color: #1e293b;
   margin: 0;
   letter-spacing: -0.03em;
+  transition: color 0.3s;
+}
+
+:root.dark .header-title {
+  color: #f8fafc;
 }
 
 .header-title .gold {
   color: #a07c28;
 }
 
+:root.dark .header-title .gold {
+  color: #d4af37;
+}
+
 .header-desc {
   color: #64748b;
   font-size: 1rem;
   margin: 0.25rem 0 0 0;
+  transition: color 0.3s;
+}
+
+:root.dark .header-desc {
+  color: #94a3b8;
 }
 
 .header-actions {
@@ -273,14 +286,26 @@ const handleRefresh = () => {
   border: 1px solid #e2e8f0;
   color: #64748b;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s;
   padding: 0;
+}
+
+:root.dark .btn-refresh {
+  background: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
 }
 
 .btn-refresh:hover:not(:disabled) {
   background: #f1f5f9;
   color: #1e293b;
   border-color: #cbd5e1;
+}
+
+:root.dark .btn-refresh:hover:not(:disabled) {
+  background: #334155;
+  color: #f8fafc;
+  border-color: #475569;
 }
 
 .btn-primary {
@@ -296,13 +321,22 @@ const handleRefresh = () => {
   text-decoration: none;
   font-size: 0.95rem;
   box-shadow: 0 4px 12px rgba(160, 124, 40, 0.2);
-  transition: transform 0.2s, background 0.2s;
+  transition: transform 0.2s, background 0.3s, box-shadow 0.2s;
+}
+
+:root.dark .btn-primary {
+  background: #a07c28;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .btn-primary:hover {
   background: #8b6b22;
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(160, 124, 40, 0.25);
+}
+
+:root.dark .btn-primary:hover {
+  background: #b89235;
 }
 
 /* Toolbar */
@@ -314,7 +348,14 @@ const handleRefresh = () => {
   display: flex;
   gap: 1.5rem;
   margin-bottom: 2.5rem;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: background 0.3s, border-color 0.3s;
+}
+
+:root.dark .blogs-toolbar {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 .search-wrap {
@@ -341,13 +382,24 @@ const handleRefresh = () => {
   font-size: 0.95rem;
   color: #1e293b;
   outline: none;
-  transition: all 0.2s;
+  transition: all 0.3s;
+}
+
+:root.dark .search-input {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f8fafc;
 }
 
 .search-input:focus {
   border-color: #a07c28;
   background: white;
   box-shadow: 0 0 0 3px rgba(160, 124, 40, 0.1);
+}
+
+:root.dark .search-input:focus {
+  background: #0f172a;
+  border-color: #a07c28;
 }
 
 .select-field {
@@ -360,6 +412,13 @@ const handleRefresh = () => {
   outline: none;
   cursor: pointer;
   min-width: 180px;
+  transition: all 0.3s;
+}
+
+:root.dark .select-field {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f8fafc;
 }
 
 /* Grid Layout */
@@ -380,10 +439,20 @@ const handleRefresh = () => {
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+:root.dark .modern-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
 .modern-card:hover {
   transform: translateY(-8px);
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
   border-color: #a07c2833;
+}
+
+:root.dark .modern-card:hover {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+  border-color: #a07c2866;
 }
 
 .card-image {
@@ -391,6 +460,11 @@ const handleRefresh = () => {
   position: relative;
   background: #f1f5f9;
   overflow: hidden;
+  transition: background 0.3s;
+}
+
+:root.dark .card-image {
+  background: #0f172a;
 }
 
 .card-image img {
@@ -412,6 +486,10 @@ const handleRefresh = () => {
   color: #cbd5e1;
 }
 
+:root.dark .img-fallback {
+  color: #334155;
+}
+
 .card-status {
   position: absolute;
   top: 1.25rem;
@@ -422,14 +500,29 @@ const handleRefresh = () => {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   z-index: 10;
 }
 
-.status-published { background: #10b981; color: white; }
-.status-draft { background: #64748b; color: white; }
-.status-scheduled { background: #3b82f6; color: white; }
-.status-neutral { background: #f1f5f9; color: #64748b; }
+.status-published {
+  background: #10b981;
+  color: white;
+}
+
+.status-draft {
+  background: #64748b;
+  color: white;
+}
+
+.status-scheduled {
+  background: #3b82f6;
+  color: white;
+}
+
+.status-neutral {
+  background: #f1f5f9;
+  color: #64748b;
+}
 
 .card-body {
   padding: 1.75rem;
@@ -450,6 +543,10 @@ const handleRefresh = () => {
   letter-spacing: 0.02em;
 }
 
+:root.dark .card-meta {
+  color: #d4af37;
+}
+
 .card-meta .date {
   color: #94a3b8;
   font-weight: 500;
@@ -468,21 +565,18 @@ const handleRefresh = () => {
   transition: color 0.2s;
 }
 
+:root.dark .card-title {
+  color: #f8fafc;
+}
+
 .modern-card:hover .card-title {
   color: #a07c28;
 }
 
-.card-excerpt {
-  font-size: 0.95rem;
-  color: #64748b;
-  line-height: 1.6;
-  margin-bottom: 2rem;
-  display: -webkit-box;
-  line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  flex: 1;
+:root.dark .modern-card:hover .card-title {
+  color: #d4af37;
 }
+
 
 .card-footer {
   display: flex;
@@ -490,6 +584,11 @@ const handleRefresh = () => {
   align-items: center;
   padding-top: 1.25rem;
   border-top: 1px solid #f1f5f9;
+  transition: border-color 0.3s;
+}
+
+:root.dark .card-footer {
+  border-top-color: #334155;
 }
 
 .card-actions {
@@ -514,6 +613,12 @@ const handleRefresh = () => {
   padding: 0;
 }
 
+:root.dark .action-btn {
+  background: #0f172a;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
 .action-btn:hover {
   background: white;
   color: #1e293b;
@@ -521,10 +626,19 @@ const handleRefresh = () => {
   transform: translateY(-2px);
 }
 
+:root.dark .action-btn:hover {
+  background: #334155;
+  color: #f8fafc;
+}
+
 .action-btn.delete:hover {
   color: #ef4444;
   border-color: #fee2e2;
   background: #fffafa;
+}
+
+:root.dark .action-btn.delete:hover {
+  background: #450a0a;
 }
 
 .author-info {
@@ -534,8 +648,19 @@ const handleRefresh = () => {
   font-size: 0.8rem;
 }
 
-.author-info .by { color: #94a3b8; }
-.author-info .name { font-weight: 700; color: #334155; }
+.author-info .by {
+  color: #94a3b8;
+}
+
+.author-info .name {
+  font-weight: 700;
+  color: #334155;
+  transition: color 0.3s;
+}
+
+:root.dark .author-info .name {
+  color: #94a3b8;
+}
 
 /* Empty State */
 .empty-state {
@@ -545,6 +670,12 @@ const handleRefresh = () => {
   border: 2px dashed #e2e8f0;
   display: flex;
   justify-content: center;
+  transition: all 0.3s;
+}
+
+:root.dark .empty-state {
+  background: #1e293b;
+  border-color: #334155;
 }
 
 .empty-box {
@@ -559,13 +690,23 @@ const handleRefresh = () => {
   margin-bottom: 2rem;
 }
 
-.empty-box h3 { 
+.empty-box h3 {
   font-size: 1.5rem;
   font-weight: 800;
-  margin-bottom: 0.75rem; 
-  color: #1e293b; 
+  margin-bottom: 0.75rem;
+  color: #1e293b;
+  transition: color 0.3s;
 }
-.empty-box p { color: #64748b; font-size: 1rem; line-height: 1.5; }
+
+:root.dark .empty-box h3 {
+  color: #f8fafc;
+}
+
+.empty-box p {
+  color: #64748b;
+  font-size: 1rem;
+  line-height: 1.5;
+}
 
 /* Footer / Pagination */
 .blogs-footer {
@@ -577,9 +718,18 @@ const handleRefresh = () => {
   padding: 1.25rem 2rem;
   border-radius: 20px;
   border: 1px solid #e2e8f0;
+  transition: all 0.3s;
 }
 
-.page-info { font-size: 0.95rem; color: #64748b; }
+:root.dark .blogs-footer {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.page-info {
+  font-size: 0.95rem;
+  color: #64748b;
+}
 
 .pagination {
   display: flex;
@@ -599,10 +749,21 @@ const handleRefresh = () => {
   transition: all 0.2s;
 }
 
+:root.dark .pag-btn {
+  background: #0f172a;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
 .pag-btn:hover:not(:disabled) {
   background: white;
   border-color: #a07c28;
   color: #a07c28;
+}
+
+:root.dark .pag-btn:hover:not(:disabled) {
+  background: #334155;
+  color: #f8fafc;
 }
 
 .pag-btn:disabled {
@@ -611,22 +772,48 @@ const handleRefresh = () => {
 }
 
 /* Icons sizing */
-.icon-sm { width: 18px; height: 18px; }
-.icon-md { width: 22px; height: 22px; }
-.icon-lg { width: 26px; height: 26px; }
-.icon-xl { width: 44px; height: 44px; }
+.icon-sm {
+  width: 18px;
+  height: 18px;
+}
+
+.icon-md {
+  width: 22px;
+  height: 22px;
+}
+
+.icon-lg {
+  width: 26px;
+  height: 26px;
+}
+
+.icon-xl {
+  width: 44px;
+  height: 44px;
+}
 
 /* Skeleton */
 .skeleton-card {
-  height: 450px;
   background: #f1f5f9;
   border-radius: 24px;
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  transition: background 0.3s;
+}
+
+:root.dark .skeleton-card {
+  background: #334155;
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: .6; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: .6;
+  }
 }
 
 @media (max-width: 768px) {
@@ -635,12 +822,15 @@ const handleRefresh = () => {
     align-items: flex-start;
     gap: 1.5rem;
   }
+
   .blogs-toolbar {
     flex-direction: column;
   }
+
   .select-field {
     width: 100%;
   }
+
   .blogs-footer {
     flex-direction: column;
     gap: 1.5rem;
