@@ -562,6 +562,7 @@ const handleRefresh = () => {
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  height: 3.78rem; /* line-height (1.35) * font-size (1.4) * 2 lines */
   transition: color 0.2s;
 }
 
@@ -794,6 +795,7 @@ const handleRefresh = () => {
 
 /* Skeleton */
 .skeleton-card {
+  height: 480px;
   background: #f1f5f9;
   border-radius: 24px;
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
