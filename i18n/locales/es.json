@@ -2,6 +2,7 @@
   "nav": {
     "dashboard": "Tablero",
     "blog": "Blog",
+    "procedures": "Procedimientos",
     "logout": "Cerrar Sesión",
     "theme": "Cambiar tema",
     "language": "Idioma",
@@ -29,7 +30,6 @@
     "status": {
       "published": "Publicado",
       "draft": "Borrador",
-      "scheduled": "Programado",
       "unknown": "Estado desconocido"
     },
     "date": {
@@ -78,6 +78,130 @@
       "successCreate": "Artículo publicado exitosamente",
       "successUpdate": "Artículo actualizado exitosamente",
       "error": "Ocurrió un error al procesar la solicitud"
+    }
+  },
+  "procedures": {
+    "header": {
+      "title": "Gestión de {content}",
+      "content": "Procedimientos",
+      "description": "Crea, edita y organiza los procedimientos médicos y estéticos de Almha.",
+      "refresh": "Actualizar lista",
+      "newEntry": "Nuevo Procedimiento"
+    },
+    "toolbar": {
+      "searchPlaceholder": "Buscar procedimientos...",
+      "filters": {
+        "all": "Todos los estados",
+        "published": "Publicados",
+        "drafts": "Borradores"
+      }
+    },
+    "grid": {
+      "noSubtitle": "Sin subtítulo"
+    },
+    "card": {
+      "noTitle": "Sin título",
+      "actions": {
+        "edit": "Editar procedimiento",
+        "delete": "Eliminar procedimiento"
+      }
+    },
+    "empty": {
+      "title": "No hay procedimientos",
+      "description": "Aún no has creado ningún procedimiento. Comienza añadiendo uno nuevo.",
+      "action": "Crear mi primer procedimiento"
+    },
+    "pagination": {
+      "info": "Página {current} de {total}",
+      "prev": "Anterior",
+      "next": "Siguiente"
+    },
+    "status": {
+      "published": "Publicado",
+      "draft": "Borrador"
+    },
+    "form": {
+      "tabs": {
+        "general": "Información General",
+        "sections": "Secciones Detalladas",
+        "preparation": "Prep. y Recuperación",
+        "faq": "FAQ e Instrucciones",
+        "gallery": "Galería de Resultados"
+      },
+      "general": {
+        "title": "Título del Procedimiento",
+        "titlePlaceholder": "Ej: Rinoplastia Ultrasónica",
+        "subtitle": "Subtítulo / Breve descripción",
+        "subtitlePlaceholder": "Ej: Perfección y armonía facial sin taponamiento",
+        "category": "Categoría",
+        "selectCategory": "Seleccionar categoría...",
+        "image": "Imagen Principal",
+        "status": "Estado",
+        "published": "Publicado (Visible en web)",
+        "draft": "Borrador (Solo admin)"
+      },
+      "sections": {
+        "add": "Añadir Nueva Sección",
+        "empty": "El procedimiento tiene 3 secciones fundamentales:",
+        "whatIs": "¿Qué es?",
+        "technique": "Técnica",
+        "recovery": "Recuperación",
+        "type": "Tipo de diseño",
+        "image": "Imagen de la sección",
+        "title": "Título de la sección",
+        "contentOne": "Contenido principal",
+        "contentTwo": "Contenido secundario (Opcional)"
+      },
+      "preparation": {
+        "steps": {
+          "title": "Pasos de Preparación",
+          "add": "Añadir Paso",
+          "stepTitle": "Título del paso",
+          "description": "Descripción detallada"
+        },
+        "recovery": {
+          "title": "Fases de Recuperación",
+          "add": "Añadir Fase",
+          "period": "Periodo (Ej: 24-48 horas)",
+          "phaseTitle": "Nombre de la fase",
+          "description": "Qué esperar"
+        }
+      },
+      "faq": {
+        "questions": {
+          "title": "Preguntas Frecuentes",
+          "add": "Añadir Pregunta",
+          "question": "Pregunta",
+          "answer": "Respuesta"
+        },
+        "instructions": {
+          "title": "Instrucciones Postoperatorias",
+          "add": "Añadir Instrucción",
+          "dos": "Recomendaciones (Dos)",
+          "donts": "Restricciones (Don'ts)",
+          "content": "Instrucción médica",
+          "type": "Tipo (Opcional)"
+        }
+      },
+      "gallery": {
+        "add": "Añadir Imagen a Galería",
+        "type": "Tipo de imagen",
+        "beforeAfter": "Antes / Después",
+        "general": "Imagen General",
+        "pairId": "ID de Pareja (Para comparar Antes/Después)"
+      },
+      "actions": {
+        "save": "Guardar Procedimiento",
+        "update": "Actualizar Procedimiento",
+        "cancel": "Cancelar",
+        "creating": "Creando...",
+        "updating": "Actualizando..."
+      },
+      "messages": {
+        "successCreate": "Procedimiento creado correctamente",
+        "successUpdate": "Procedimiento actualizado con éxito",
+        "error": "Error al procesar el procedimiento"
+      }
     }
   },
   "auth": {

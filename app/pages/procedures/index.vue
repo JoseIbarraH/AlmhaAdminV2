@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed, onMounted, watchEffect } from 'vue'
+import { ref, watch, computed, onMounted, onUnmounted, watchEffect } from 'vue'
 
 definePageMeta({
   middleware: ['auth']
@@ -26,10 +26,51 @@ watch(selectedStatus, () => {
   page.value = 1
 })
 
+interface Procedure {
+  id: number | string
+  image: string | null
+  status: string
+  categoryCode: string
+  translations: {
+    title: string
+    subtitle: string
+  }[]
+  views: number
+}
+
+interface ApiResponse {
+  data: Procedure[]
+  meta: {
+    current_page: number
+    last_page: number
+    total: number
+    per_page: number
+  }
+}
+
+// Fetch de datos reactivo
+const { data: response, pending, refresh, error } = await useAsyncData<ApiResponse>(
+  'procedures',
+  () => useApi<ApiResponse>('/procedures', {
+    query: {
+      page: page.value,
+      per_page: 8,
+      search: debouncedSearch.value,
+      status: selectedStatus.value
+    }
+  }),
+  {
+    watch: [page, debouncedSearch, selectedStatus]
+  }
+)
+
+const procedures = computed(() => response.value?.data || [])
+const meta = computed(() => response.value?.meta || null)
+
 const statusOptions = computed(() => [
-  { label: useI18n().t('blogs.toolbar.filters.all'), value: '' },
-  { label: useI18n().t('blogs.toolbar.filters.published'), value: 'published' },
-  { label: useI18n().t('blogs.toolbar.filters.drafts'), value: 'draft' }
+  { label: useI18n().t('procedures.toolbar.filters.all'), value: '' },
+  { label: useI18n().t('procedures.toolbar.filters.published'), value: 'published' },
+  { label: useI18n().t('procedures.toolbar.filters.drafts'), value: 'draft' }
 ])
 
 const currentStatusLabel = computed(() => {
@@ -46,7 +87,6 @@ const selectStatus = (value: string) => {
   isMenuOpen.value = false
 }
 
-// Close menu on click outside
 const closeMenu = (e: MouseEvent) => {
   const target = e.target as HTMLElement
   if (!target.closest('.custom-select')) {
@@ -62,57 +102,6 @@ onUnmounted(() => {
   document.removeEventListener('click', closeMenu)
 })
 
-interface Blog {
-  id: number | string
-  image: string | null
-  status: string
-  categoryCode: string
-  publishedAt: string | null
-  translations: {
-    title: string
-    content: string
-  }[]
-  writer: string
-}
-
-interface ApiResponse {
-  data: Blog[]
-  meta: {
-    current_page: number
-    last_page: number
-    total: number
-    per_page: number
-  }
-}
-
-// Fetch de datos reactivo con tipado
-const { data: response, pending, refresh, error } = await useAsyncData<ApiResponse>(
-  'blogs',
-  () => useApi<ApiResponse>('/blogs', {
-    query: {
-      page: page.value,
-      per_page: 8,
-      search: debouncedSearch.value,
-      status: selectedStatus.value
-    }
-  }),
-  {
-    watch: [page, debouncedSearch, selectedStatus]
-  }
-)
-
-// Debug logs
-watchEffect(() => {
-  if (response.value) console.log('Blogs Response:', response.value)
-  if (error.value) console.error('Blogs Fetch Error:', error.value)
-})
-
-const blogs = computed(() => {
-  console.log('Computing blogs from response:', response.value)
-  return response.value?.data || []
-})
-const meta = computed(() => response.value?.meta || null)
-
 const getStatusClass = (status: string) => {
   switch (status) {
     case 'published': return 'status-published'
@@ -123,20 +112,10 @@ const getStatusClass = (status: string) => {
 
 const getStatusLabel = (status: string) => {
   switch (status) {
-    case 'published': return useI18n().t('blogs.status.published')
-    case 'draft': return useI18n().t('blogs.status.draft')
+    case 'published': return useI18n().t('procedures.status.published')
+    case 'draft': return useI18n().t('procedures.status.draft')
     default: return status
   }
-}
-
-const formatDate = (dateString: string | null) => {
-  const { t, locale } = useI18n()
-  if (!dateString) return t('blogs.date.empty')
-  return new Date(dateString).toLocaleDateString(t('blogs.date.format'), {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
 }
 
 const handleRefresh = () => {
@@ -145,33 +124,33 @@ const handleRefresh = () => {
 </script>
 
 <template>
-  <div class="blogs-container">
+  <div class="procedures-container">
     <!-- Header -->
-    <header class="blogs-header">
+    <header class="procedures-header">
       <div class="header-info">
-        <i18n-t keypath="blogs.header.title" tag="h1" class="header-title">
+        <i18n-t keypath="procedures.header.title" tag="h1" class="header-title">
           <template #content>
-            <span class="gold">{{ $t('blogs.header.content') }}</span>
+            <span class="gold">{{ $t('procedures.header.content') }}</span>
           </template>
         </i18n-t>
-        <p class="header-desc">{{ $t('blogs.header.description') }}</p>
+        <p class="header-desc">{{ $t('procedures.header.description') }}</p>
       </div>
       <div class="header-actions">
-        <button class="btn-refresh" :disabled="pending" @click="handleRefresh" :title="$t('blogs.header.refresh')">
+        <button class="btn-refresh" :disabled="pending" @click="handleRefresh" :title="$t('procedures.header.refresh')">
           <UIcon name="i-heroicons-arrow-path" :class="{ 'animate-spin': pending }" class="icon-md" />
         </button>
-        <NuxtLink to="/blogs/create" class="btn-primary">
+        <NuxtLink to="/procedures/create" class="btn-primary">
           <UIcon name="i-heroicons-plus" class="icon-md" />
-          <span>{{ $t('blogs.header.newEntry') }}</span>
+          <span>{{ $t('procedures.header.newEntry') }}</span>
         </NuxtLink>
       </div>
     </header>
 
     <!-- Toolbar -->
-    <div class="blogs-toolbar">
+    <div class="procedures-toolbar">
       <div class="search-wrap">
         <UIcon name="i-heroicons-magnifying-glass" class="search-icon" />
-        <input v-model="searchQuery" type="text" :placeholder="$t('blogs.toolbar.searchPlaceholder')" class="search-input" />
+        <input v-model="searchQuery" type="text" :placeholder="$t('procedures.toolbar.searchPlaceholder')" class="search-input" />
       </div>
       <div class="filters-wrap">
         <div class="custom-select">
@@ -193,44 +172,43 @@ const handleRefresh = () => {
     </div>
 
     <!-- Grid -->
-    <div v-if="pending && !blogs.length" class="blogs-grid">
+    <div v-if="pending && !procedures.length" class="procedures-grid">
       <div v-for="i in 6" :key="i" class="skeleton-card"></div>
     </div>
 
-    <div v-else-if="blogs.length" class="blogs-grid">
-      <article v-for="blog in blogs" :key="blog.id" class="modern-card">
+    <div v-else-if="procedures.length" class="procedures-grid">
+      <article v-for="proc in procedures" :key="proc.id" class="modern-card">
         <div class="card-image">
-          <img v-if="blog.image" :src="blog.image" alt="Portada" />
+          <img v-if="proc.image" :src="proc.image" alt="Portada" />
           <div v-else class="img-fallback">
-            <UIcon name="i-heroicons-photo" class="icon-xl" />
+            <UIcon name="i-heroicons-sparkles" class="icon-xl" />
           </div>
-          <div class="card-status" :class="getStatusClass(blog.status)">
-            {{ getStatusLabel(blog.status) }}
+          <div class="card-status" :class="getStatusClass(proc.status)">
+            {{ getStatusLabel(proc.status) }}
           </div>
         </div>
 
         <div class="card-body">
           <div class="card-meta">
-            <span class="cat">{{ blog.categoryCode }}</span>
+            <span class="cat">{{ proc.categoryCode }}</span>
             <span class="spacer">•</span>
-            <span class="date">{{ formatDate(blog.publishedAt) }}</span>
+            <span class="views">
+              <UIcon name="i-heroicons-eye" class="icon-xs inline-block mr-1" />
+              {{ proc.views }}
+            </span>
           </div>
 
-          <h2 class="card-title">{{ blog.translations?.[0]?.title || $t('blogs.card.noTitle') }}</h2>
-
+          <h2 class="card-title">{{ proc.translations?.[0]?.title || $t('procedures.card.noTitle') }}</h2>
+          <p class="card-subtitle">{{ proc.translations?.[0]?.subtitle || '' }}</p>
 
           <footer class="card-footer">
             <div class="card-actions">
-              <NuxtLink :to="`/blogs/${blog.id}/edit`" class="action-btn edit" :title="$t('blogs.card.actions.edit')">
+              <NuxtLink :to="`/procedures/${proc.id}/edit`" class="action-btn edit" :title="$t('procedures.card.actions.edit')">
                 <UIcon name="i-heroicons-pencil-square" class="icon-sm" />
               </NuxtLink>
-              <button class="action-btn delete" :title="$t('blogs.card.actions.delete')">
+              <button class="action-btn delete" :title="$t('procedures.card.actions.delete')">
                 <UIcon name="i-heroicons-trash" class="icon-sm" />
               </button>
-            </div>
-            <div class="author-info">
-              <span class="by">{{ $t('blogs.card.author.by') }}</span>
-              <span class="name">{{ blog.writer }}</span>
             </div>
           </footer>
         </div>
@@ -240,19 +218,19 @@ const handleRefresh = () => {
     <!-- Empty -->
     <div v-else class="empty-state">
       <div class="empty-box">
-        <UIcon name="i-heroicons-document-search" class="icon-empty" />
-        <h3>{{ $t('blogs.empty.title') }}</h3>
-        <p>{{ $t('blogs.empty.description') }}</p>
+        <UIcon name="i-heroicons-sparkles" class="icon-empty" />
+        <h3>{{ $t('procedures.empty.title') }}</h3>
+        <p>{{ $t('procedures.empty.description') }}</p>
         <div class="mt-8 flex justify-center">
-          <NuxtLink to="/blogs/create" class="btn-primary">{{ $t('blogs.empty.action') }}</NuxtLink>
+          <NuxtLink to="/procedures/create" class="btn-primary">{{ $t('procedures.empty.action') }}</NuxtLink>
         </div>
       </div>
     </div>
 
     <!-- Footer -->
-    <footer v-if="meta && meta.last_page > 1" class="blogs-footer">
+    <footer v-if="meta && meta.last_page > 1" class="procedures-footer">
       <div class="page-info">
-        <i18n-t keypath="blogs.pagination.info" tag="span">
+        <i18n-t keypath="procedures.pagination.info" tag="span">
           <template #current>
             <strong>{{ meta.current_page }}</strong>
           </template>
@@ -263,10 +241,10 @@ const handleRefresh = () => {
       </div>
       <div class="pagination">
         <button class="pag-btn" :disabled="page === 1" @click="page--">
-          {{ $t('blogs.pagination.prev') }}
+          {{ $t('procedures.pagination.prev') }}
         </button>
         <button class="pag-btn" :disabled="page === meta.last_page" @click="page++">
-          {{ $t('blogs.pagination.next') }}
+          {{ $t('procedures.pagination.next') }}
         </button>
       </div>
     </footer>
@@ -274,14 +252,14 @@ const handleRefresh = () => {
 </template>
 
 <style scoped>
-.blogs-container {
+.procedures-container {
   max-width: 1200px;
   margin: 0 auto;
   padding-bottom: 3rem;
 }
 
 /* Header Styles */
-.blogs-header {
+.procedures-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -390,7 +368,7 @@ const handleRefresh = () => {
 }
 
 /* Toolbar */
-.blogs-toolbar {
+.procedures-toolbar {
   background: white;
   padding: 1.25rem;
   border-radius: 16px;
@@ -402,7 +380,7 @@ const handleRefresh = () => {
   transition: background 0.3s, border-color 0.3s;
 }
 
-:root.dark .blogs-toolbar {
+:root.dark .procedures-toolbar {
   background: #1e293b;
   border-color: #334155;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
@@ -447,7 +425,12 @@ const handleRefresh = () => {
   box-shadow: 0 0 0 3px rgba(160, 124, 40, 0.1);
 }
 
-:root.dark .custom-select {
+:root.dark .search-input:focus {
+  background: #0f172a;
+  border-color: #a07c28;
+}
+
+.custom-select {
   position: relative;
   display: inline-block;
   min-width: 180px;
@@ -610,7 +593,7 @@ const handleRefresh = () => {
 }
 
 /* Grid Layout */
-.blogs-grid {
+.procedures-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 2.5rem;
@@ -702,11 +685,6 @@ const handleRefresh = () => {
   color: white;
 }
 
-.status-scheduled {
-  background: #3b82f6;
-  color: white;
-}
-
 .status-neutral {
   background: #f1f5f9;
   color: #64748b;
@@ -735,9 +713,11 @@ const handleRefresh = () => {
   color: #d4af37;
 }
 
-.card-meta .date {
+.card-meta .views {
   color: #94a3b8;
   font-weight: 500;
+  display: flex;
+  align-items: center;
 }
 
 .card-title {
@@ -745,12 +725,12 @@ const handleRefresh = () => {
   font-weight: 800;
   line-height: 1.35;
   color: #1e293b;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   display: -webkit-box;
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  height: 3.78rem; /* line-height (1.35) * font-size (1.4) * 2 lines */
+  height: 3.78rem; 
   transition: color 0.2s;
 }
 
@@ -766,6 +746,21 @@ const handleRefresh = () => {
   color: #d4af37;
 }
 
+.card-subtitle {
+  font-size: 0.95rem;
+  color: #64748b;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: 2.85rem;
+}
+
+:root.dark .card-subtitle {
+  color: #94a3b8;
+}
 
 .card-footer {
   display: flex;
@@ -774,6 +769,7 @@ const handleRefresh = () => {
   padding-top: 1.25rem;
   border-top: 1px solid #f1f5f9;
   transition: border-color 0.3s;
+  margin-top: auto;
 }
 
 :root.dark .card-footer {
@@ -830,27 +826,6 @@ const handleRefresh = () => {
   background: #450a0a;
 }
 
-.author-info {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.8rem;
-}
-
-.author-info .by {
-  color: #94a3b8;
-}
-
-.author-info .name {
-  font-weight: 700;
-  color: #334155;
-  transition: color 0.3s;
-}
-
-:root.dark .author-info .name {
-  color: #94a3b8;
-}
-
 /* Empty State */
 .empty-state {
   background: white;
@@ -898,7 +873,7 @@ const handleRefresh = () => {
 }
 
 /* Footer / Pagination */
-.blogs-footer {
+.procedures-footer {
   margin-top: 4rem;
   display: flex;
   justify-content: space-between;
@@ -910,7 +885,7 @@ const handleRefresh = () => {
   transition: all 0.3s;
 }
 
-:root.dark .blogs-footer {
+:root.dark .procedures-footer {
   background: #1e293b;
   border-color: #334155;
 }
@@ -981,6 +956,11 @@ const handleRefresh = () => {
   height: 44px;
 }
 
+.icon-xs {
+  width: 14px;
+  height: 14px;
+}
+
 /* Skeleton */
 .skeleton-card {
   height: 480px;
@@ -995,33 +975,23 @@ const handleRefresh = () => {
 }
 
 @keyframes pulse {
-
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: .6;
-  }
+  0%, 100% { opacity: 1; }
+  50% { opacity: .6; }
 }
 
 @media (max-width: 768px) {
-  .blogs-header {
+  .procedures-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 1.5rem;
   }
-
-  .blogs-toolbar {
+  .procedures-toolbar {
     flex-direction: column;
   }
-
-  .select-field {
+  .custom-select {
     width: 100%;
   }
-
-  .blogs-footer {
+  .procedures-footer {
     flex-direction: column;
     gap: 1.5rem;
     text-align: center;

@@ -2,6 +2,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "blog": "Blog",
+    "procedures": "Procedures",
     "logout": "Logout",
     "theme": "Change theme",
     "language": "Language",
@@ -29,7 +30,6 @@
     "status": {
       "published": "Published",
       "draft": "Draft",
-      "scheduled": "Scheduled",
       "unknown": "Unknown"
     },
     "date": {
@@ -78,6 +78,130 @@
       "successCreate": "Article published successfully",
       "successUpdate": "Article updated successfully",
       "error": "An error occurred while processing the request"
+    }
+  },
+  "procedures": {
+    "header": {
+      "title": "{content} Management",
+      "content": "Procedures",
+      "description": "Create, edit, and organize Almha's medical and aesthetic procedures.",
+      "refresh": "Refresh list",
+      "newEntry": "New Procedure"
+    },
+    "toolbar": {
+      "searchPlaceholder": "Search procedures...",
+      "filters": {
+        "all": "All statuses",
+        "published": "Published",
+        "drafts": "Drafts"
+      }
+    },
+    "grid": {
+      "noSubtitle": "No subtitle"
+    },
+    "card": {
+      "noTitle": "No title",
+      "actions": {
+        "edit": "Edit procedure",
+        "delete": "Delete procedure"
+      }
+    },
+    "empty": {
+      "title": "No procedures found",
+      "description": "You haven't created any procedures yet. Start by adding a new one.",
+      "action": "Create my first procedure"
+    },
+    "pagination": {
+      "info": "Page {current} of {total}",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "status": {
+      "published": "Published",
+      "draft": "Draft"
+    },
+    "form": {
+      "tabs": {
+        "general": "General Information",
+        "sections": "Detailed Sections",
+        "preparation": "Prep & Recovery",
+        "faq": "FAQ & Instructions",
+        "gallery": "Result Gallery"
+      },
+      "general": {
+        "title": "Procedure Title",
+        "titlePlaceholder": "e.g. Ultrasonic Rhinoplasty",
+        "subtitle": "Subtitle / Brief description",
+        "subtitlePlaceholder": "e.g. Perfection and facial harmony without packing",
+        "category": "Category",
+        "selectCategory": "Select category...",
+        "image": "Main Image",
+        "status": "Status",
+        "published": "Published (Visible on web)",
+        "draft": "Draft (Admin only)"
+      },
+      "sections": {
+        "add": "Add New Section",
+        "empty": "The procedure has 3 fundamental sections:",
+        "whatIs": "What is?",
+        "technique": "Technique",
+        "recovery": "Recovery",
+        "type": "Design type",
+        "image": "Section image",
+        "title": "Section title",
+        "contentOne": "Main content",
+        "contentTwo": "Secondary content (Optional)"
+      },
+      "preparation": {
+        "steps": {
+          "title": "Preparation Steps",
+          "add": "Add Step",
+          "stepTitle": "Step title",
+          "description": "Detailed description"
+        },
+        "recovery": {
+          "title": "Recovery Phases",
+          "add": "Add Phase",
+          "period": "Period (e.g. 24-48 hours)",
+          "phaseTitle": "Phase name",
+          "description": "What to expect"
+        }
+      },
+      "faq": {
+        "questions": {
+          "title": "Frequently Asked Questions",
+          "add": "Add Question",
+          "question": "Question",
+          "answer": "Answer"
+        },
+        "instructions": {
+          "title": "Postoperative Instructions",
+          "add": "Add Instruction",
+          "dos": "Recommendations (Dos)",
+          "donts": "Restrictions (Don'ts)",
+          "content": "Medical instruction",
+          "type": "Type (Optional)"
+        }
+      },
+      "gallery": {
+        "add": "Add Image to Gallery",
+        "type": "Image type",
+        "beforeAfter": "Before / After",
+        "general": "General Image",
+        "pairId": "Pair ID (For Before/After comparison)"
+      },
+      "actions": {
+        "save": "Save Procedure",
+        "update": "Update Procedure",
+        "cancel": "Cancel",
+        "creating": "Creating...",
+        "updating": "Updating..."
+      },
+      "messages": {
+        "successCreate": "Procedure created successfully",
+        "successUpdate": "Procedure updated successfully",
+        "error": "Error processing procedure"
+      }
     }
   },
   "auth": {
