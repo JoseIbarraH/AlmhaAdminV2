@@ -46,13 +46,22 @@ const handleCreate = async (formData: FormData) => {
 
 <template>
   <div class="create-blog-page">
-    <header class="page-header mb-8">
+    <header class="page-header mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div class="flex items-center gap-4">
         <UButton icon="i-heroicons-arrow-left" variant="ghost" color="neutral" @click="router.back()" />
         <div>
           <h1 class="page-title">{{ t('blogs.form.createTitle') }}</h1>
           <p class="page-desc">{{ t('blogs.form.createDesc') }}</p>
         </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <UButton type="button" variant="ghost" color="neutral" size="lg" rounded="xl" @click="router.back()">
+          {{ t('blogs.form.cancel') }}
+        </UButton>
+        <UButton type="button" color="primary" size="lg" rounded="xl" class="px-8 font-bold" :loading="loading" @click="formRef?.handleSubmit()">
+          {{ t('blogs.form.publish') }}
+        </UButton>
       </div>
     </header>
 

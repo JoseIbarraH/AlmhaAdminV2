@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import RichTextEditor from './RichTextEditor.vue'
+import BlogCategoryModal from './BlogCategoryModal.vue'
 
 const props = defineProps({
   initialData: {
@@ -17,15 +18,35 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['submit', 'cancel'])
+const emit = defineEmits(['submit', 'cancel', 'change-language'])
+const { t, locales } = useI18n()
 
 const form = ref({
   title: props.initialData.translations?.[0]?.title || '',
   content: props.initialData.translations?.[0]?.content || '',
   categoryCode: props.initialData.categoryCode || '',
   writer: props.initialData.writer || '',
-  baseLang: props.initialData.base_lang || 'es',
+  baseLang: props.initialData.translations?.[0]?.lang || props.initialData.base_lang || 'es',
   image: null as File | null
+})
+
+// Update form when initialData changes (for reactive re-fetches)
+watch(() => props.initialData, (newData) => {
+  if (newData) {
+    form.value.title = newData.translations?.[0]?.title || ''
+    form.value.content = newData.translations?.[0]?.content || ''
+    form.value.categoryCode = newData.categoryCode || ''
+    form.value.writer = newData.writer || ''
+    // We keep the current baseLang as it was the one selected by the user
+    // causing this refresh.
+  }
+}, { deep: true })
+
+// Emit language change to parent to trigger re-fetch in Edit mode
+watch(() => form.value.baseLang, (newLang) => {
+  if (props.isEdit) {
+    emit('change-language', newLang)
+  }
 })
 
 const imagePreview = ref(props.initialData.image || null)
@@ -38,16 +59,22 @@ const handleImageChange = (event: Event) => {
   }
 }
 
-const categories = ref<{ code: string, name: string }[]>([])
+const categories = ref<{ value: string, label: string }[]>([])
 const loadingCategories = ref(false)
+const isCategoryModalOpen = ref(false)
 
 const fetchCategories = async () => {
   loadingCategories.value = true
   try {
-    const response = await useApi<{ data: any[] }>('/blog-categories')
+    const response = await useApi<{ data: any[] }>('/blog-categories', {
+      headers: {
+        'Accept-Language': form.value.baseLang
+      }
+    })
+    console.log('Categories API Response:', response)
     categories.value = response.data.map(cat => ({
-      code: cat.code,
-      name: cat.translations?.[0]?.name || cat.code
+      value: cat.code,
+      label: cat.name || cat.code
     }))
   } catch (error) {
     console.error('Error fetching categories:', error)
@@ -55,6 +82,15 @@ const fetchCategories = async () => {
     loadingCategories.value = false
   }
 }
+
+const { locale } = useI18n()
+watch(() => form.value.baseLang, () => {
+  fetchCategories()
+})
+watch(locale, (newLocale) => {
+  form.value.baseLang = newLocale.split('-')[0] || 'es'
+  fetchCategories()
+})
 
 onMounted(() => {
   fetchCategories()
@@ -82,9 +118,7 @@ const commitDeletions = async () => {
   }
 }
 
-defineExpose({ commitDeletions })
-
-const { t } = useI18n()
+defineExpose({ handleSubmit, commitDeletions })
 </script>
 
 <template>
@@ -94,12 +128,15 @@ const { t } = useI18n()
       <div class="main-column">
         <section class="card-section">
           <UFormField :label="t('blogs.form.title')" required>
-            <UInput v-model="form.title" :placeholder="t('blogs.form.titlePlaceholder')" size="lg" class="title-input" />
+            <UInput v-model="form.title" :placeholder="t('blogs.form.titlePlaceholder')" size="lg"
+              class="title-input" />
           </UFormField>
 
           <UFormField :label="t('blogs.form.content')" class="mt-6">
             <RichTextEditor ref="editorRef" v-model="form.content" :blog-id="props.initialData.id" />
           </UFormField>
+
+
         </section>
       </div>
 
@@ -108,17 +145,26 @@ const { t } = useI18n()
         <!-- Settings -->
         <section class="card-section">
           <h3 class="section-title">{{ t('blogs.form.settings') }}</h3>
-          
+
           <UFormField :label="t('blogs.form.category')" required class="mt-4">
-            <USelect v-model="form.categoryCode" :options="categories" option-attribute="name" value-attribute="code" :placeholder="t('blogs.form.selectCategory')" :loading="loadingCategories" />
+            <div class="flex items-center gap-2">
+              <USelectMenu v-model="form.categoryCode" :items="categories" value-key="value"
+                :search-input="{ placeholder: 'Buscar...' }" :placeholder="t('blogs.form.selectCategory')"
+                :loading="loadingCategories" class="flex-1" />
+              <UButton icon="i-heroicons-cog-6-tooth" color="neutral" variant="soft" @click="isCategoryModalOpen = true"
+                title="Gestionar Categorías" />
+            </div>
           </UFormField>
 
-          <UFormField :label="t('blogs.form.writer')" class="mt-4">
-            <UInput v-model="form.writer" :placeholder="t('blogs.form.writerPlaceholder')" />
+          <UFormField :label="t('blogs.form.writer')" required class="mt-4">
+            <UInput v-model="form.writer" :placeholder="t('blogs.form.writerPlaceholder')" size="lg"
+              icon="i-heroicons-user" class="w-full" />
           </UFormField>
 
           <UFormField :label="t('blogs.form.baseLang')" class="mt-4">
-            <USelect v-model="form.baseLang" :options="[{ label: 'Español', value: 'es' }, { label: 'English', value: 'en' }]" />
+            <UInput :model-value="locales.find(l => l.code === form.baseLang)?.name || form.baseLang.toUpperCase()"
+              readonly disabled icon="i-heroicons-language" size="lg"
+              class="w-full bg-slate-50/50 dark:bg-slate-900/50" />
           </UFormField>
         </section>
 
@@ -140,17 +186,11 @@ const { t } = useI18n()
           </div>
         </section>
 
-        <!-- Actions -->
-        <div class="form-actions mt-8">
-          <UButton type="submit" block color="primary" size="lg" :loading="loading">
-            {{ isEdit ? t('blogs.form.update') : t('blogs.form.publish') }}
-          </UButton>
-          <UButton type="button" block variant="ghost" color="neutral" class="mt-2" @click="emit('cancel')">
-            {{ t('blogs.form.cancel') }}
-          </UButton>
-        </div>
       </div>
     </div>
+
+    <!-- Modal de categorías -->
+    <BlogCategoryModal v-model="isCategoryModalOpen" @updated="fetchCategories" />
   </form>
 </template>
 
@@ -171,6 +211,7 @@ const { t } = useI18n()
   .form-grid {
     grid-template-columns: 1fr;
   }
+
   .side-column {
     order: -1;
   }

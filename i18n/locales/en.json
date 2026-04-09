@@ -78,6 +78,27 @@
       "successCreate": "Article published successfully",
       "successUpdate": "Article updated successfully",
       "error": "An error occurred while processing the request"
+    },
+    "categories": {
+      "modalTitle": "Categories Management",
+      "listTitle": "Categories",
+      "searchPlaceholder": "Search...",
+      "newCategory": "New Category",
+      "emptyState": "No results",
+      "noCategories": "No categories created yet.",
+      "editTitle": "Edit Details",
+      "createTitle": "Create Category",
+      "formDescription": "Configure the parameters of the selected record.",
+      "labelName": "Public Category Name",
+      "helpName": "This name will be visible to your patients on the blog.",
+      "labelSlug": "Slug (Identifier)",
+      "labelLang": "Registration Language",
+      "btnDelete": "Delete Record",
+      "btnClear": "Clear",
+      "btnSave": "Save Changes",
+      "btnCreate": "Finish Creation",
+      "successSave": "Category saved successfully.",
+      "successDelete": "Category deleted successfully."
     }
   },
   "procedures": {
@@ -124,7 +145,8 @@
       "tabs": {
         "general": "General Information",
         "sections": "Detailed Sections",
-        "preparation": "Prep & Recovery",
+        "preparation": "Preparation Steps",
+        "recovery": "Recovery Phases",
         "faq": "FAQ & Instructions",
         "gallery": "Result Gallery"
       },
@@ -140,8 +162,13 @@
         "published": "Published (Visible on web)",
         "draft": "Draft (Admin only)"
       },
+      "pagination": {
+        "prev": "Previous",
+        "next": "Next"
+      },
       "sections": {
         "add": "Add New Section",
+        "description": "Configure the key stages of the intervention.",
         "empty": "The procedure has 3 fundamental sections:",
         "whatIs": "What is?",
         "technique": "Technique",
@@ -150,45 +177,61 @@
         "image": "Section image",
         "title": "Section title",
         "contentOne": "Main content",
-        "contentTwo": "Secondary content (Optional)"
+        "contentTwo": "Secondary content (Optional)",
+        "uploadVisual": "Upload Visual"
       },
       "preparation": {
         "steps": {
           "title": "Preparation Steps",
+          "description": "Clear instructions for the patient before the procedure.",
           "add": "Add Step",
           "stepTitle": "Step title",
-          "description": "Detailed description"
-        },
-        "recovery": {
+          "stepDescription": "Detailed description",
+          "empty": "No steps defined yet. Start by adding a new one."
+        }
+      },
+      "recovery": {
+        "phases": {
           "title": "Recovery Phases",
+          "description": "What to expect during the postoperative healing process.",
           "add": "Add Phase",
           "period": "Period (e.g. 24-48 hours)",
           "phaseTitle": "Phase name",
-          "description": "What to expect"
+          "phaseDescription": "What to expect",
+          "empty": "No recovery phases defined yet."
         }
       },
       "faq": {
         "questions": {
           "title": "Frequently Asked Questions",
+          "description": "Solve the most common doubts of your patients.",
           "add": "Add Question",
           "question": "Question",
-          "answer": "Answer"
+          "answer": "Answer",
+          "empty": "No frequently asked questions yet. Start by adding a new one."
         },
         "instructions": {
           "title": "Postoperative Instructions",
+          "description": "Specific care to ensure the success of the surgery.",
           "add": "Add Instruction",
           "dos": "Recommendations (Dos)",
           "donts": "Restrictions (Don'ts)",
           "content": "Medical instruction",
-          "type": "Type (Optional)"
+          "type": "Type (Optional)",
+          "empty": "No instructions recorded yet."
         }
       },
       "gallery": {
+        "description": "Manage the before and after comparisons of your patients' results.",
         "add": "Add Image to Gallery",
         "type": "Image type",
         "beforeAfter": "Before / After",
+        "before": "Before",
+        "after": "After",
         "general": "General Image",
-        "pairId": "Pair ID (For Before/After comparison)"
+        "pairId": "Pair ID (For Before/After comparison)",
+        "case": "CASE #",
+        "empty": "No results recorded. Add a new case to start."
       },
       "actions": {
         "save": "Save Procedure",
@@ -202,6 +245,28 @@
         "successUpdate": "Procedure updated successfully",
         "error": "Error processing procedure"
       }
+    },
+    "categories": {
+      "modalTitle": "Categories Management",
+      "newCategory": "New Category",
+      "searchPlaceholder": "Search category...",
+      "emptyState": "No results",
+      "errorLoading": "Could not load categories.",
+      "successUpdate": "Category updated successfully",
+      "successSave": "Category created successfully",
+      "successDelete": "Category deleted successfully",
+      "editTitle": "Edit Category",
+      "createTitle": "Create Category",
+      "formDescription": "Manage the main categories of your medical procedures.",
+      "mainData": "Main Data",
+      "labelName": "Category Name",
+      "helpName": "This is the visible name that users will see.",
+      "labelSlug": "Identifier (Slug)",
+      "labelLang": "Base Language",
+      "btnDelete": "Delete Category",
+      "btnClear": "Clear Form",
+      "btnSave": "Save Changes",
+      "btnCreate": "Create Category"
     }
   },
   "auth": {
@@ -224,7 +289,7 @@
       },
       "quote": "\"Almha has transformed how we manage our projects.\"",
       "errors": {
-        "email_required": "Email current is required",
+        "email_required": "Email address is required",
         "email_invalid": "Enter a valid email address",
         "password_required": "Password is required",
         "invalid_credentials": "Invalid credentials.",

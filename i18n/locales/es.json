@@ -78,6 +78,27 @@
       "successCreate": "Artículo publicado exitosamente",
       "successUpdate": "Artículo actualizado exitosamente",
       "error": "Ocurrió un error al procesar la solicitud"
+    },
+    "categories": {
+      "modalTitle": "Gestión de Categorías",
+      "listTitle": "Categorías",
+      "searchPlaceholder": "Buscar...",
+      "newCategory": "Nueva Categoría",
+      "emptyState": "Sin resultados",
+      "noCategories": "Aún no hay categorías creadas.",
+      "editTitle": "Editar Detalle",
+      "createTitle": "Crear Categoría",
+      "formDescription": "Configura los parámetros del registro seleccionado.",
+      "labelName": "Nombre Público de la Categoría",
+      "helpName": "Este nombre será visible para tus pacientes en el blog.",
+      "labelSlug": "Slug (Identificador)",
+      "labelLang": "Idioma de Registro",
+      "btnDelete": "Eliminar Registro",
+      "btnClear": "Limpiar",
+      "btnSave": "Guardar Cambios",
+      "btnCreate": "Finalizar Creación",
+      "successSave": "Categoría guardada con éxito.",
+      "successDelete": "Categoría eliminada con éxito."
     }
   },
   "procedures": {
@@ -124,7 +145,8 @@
       "tabs": {
         "general": "Información General",
         "sections": "Secciones Detalladas",
-        "preparation": "Prep. y Recuperación",
+        "preparation": "Pasos de Preparación",
+        "recovery": "Fases de Recuperación",
         "faq": "FAQ e Instrucciones",
         "gallery": "Galería de Resultados"
       },
@@ -140,8 +162,13 @@
         "published": "Publicado (Visible en web)",
         "draft": "Borrador (Solo admin)"
       },
+      "pagination": {
+        "prev": "Anterior",
+        "next": "Siguiente"
+      },
       "sections": {
         "add": "Añadir Nueva Sección",
+        "description": "Configura las etapas clave de la intervención.",
         "empty": "El procedimiento tiene 3 secciones fundamentales:",
         "whatIs": "¿Qué es?",
         "technique": "Técnica",
@@ -150,45 +177,61 @@
         "image": "Imagen de la sección",
         "title": "Título de la sección",
         "contentOne": "Contenido principal",
-        "contentTwo": "Contenido secundario (Opcional)"
+        "contentTwo": "Contenido secundario (Opcional)",
+        "uploadVisual": "Subir Visual"
       },
       "preparation": {
         "steps": {
           "title": "Pasos de Preparación",
+          "description": "Instrucciones claras para el paciente antes del procedimiento.",
           "add": "Añadir Paso",
           "stepTitle": "Título del paso",
-          "description": "Descripción detallada"
-        },
-        "recovery": {
+          "stepDescription": "Descripción detallada",
+          "empty": "No hay pasos definidos aún. Comienza añadiendo uno nuevo."
+        }
+      },
+      "recovery": {
+        "phases": {
           "title": "Fases de Recuperación",
+          "description": "Qué esperar durante el proceso de sanación postoperatoria.",
           "add": "Añadir Fase",
           "period": "Periodo (Ej: 24-48 horas)",
           "phaseTitle": "Nombre de la fase",
-          "description": "Qué esperar"
+          "phaseDescription": "Qué esperar",
+          "empty": "No hay fases de recuperación definidas aún."
         }
       },
       "faq": {
         "questions": {
           "title": "Preguntas Frecuentes",
+          "description": "Resuelve las dudas más comunes de tus pacientes.",
           "add": "Añadir Pregunta",
           "question": "Pregunta",
-          "answer": "Respuesta"
+          "answer": "Respuesta",
+          "empty": "No hay preguntas frecuentes aún. Comienza añadiendo una nueva."
         },
         "instructions": {
           "title": "Instrucciones Postoperatorias",
+          "description": "Cuidados específicos para garantizar el éxito de la cirugía.",
           "add": "Añadir Instrucción",
           "dos": "Recomendaciones (Dos)",
           "donts": "Restricciones (Don'ts)",
           "content": "Instrucción médica",
-          "type": "Tipo (Opcional)"
+          "type": "Tipo (Opcional)",
+          "empty": "No hay instrucciones registradas aún."
         }
       },
       "gallery": {
+        "description": "Gestiona las comparativas de resultados \"Antes y Después\" de tus pacientes.",
         "add": "Añadir Imagen a Galería",
         "type": "Tipo de imagen",
         "beforeAfter": "Antes / Después",
+        "before": "Antes",
+        "after": "Después",
         "general": "Imagen General",
-        "pairId": "ID de Pareja (Para comparar Antes/Después)"
+        "pairId": "ID de Pareja (Para comparar Antes/Después)",
+        "case": "CASO #",
+        "empty": "No hay resultados registrados. Añade un nuevo caso para comenzar."
       },
       "actions": {
         "save": "Guardar Procedimiento",
@@ -202,6 +245,28 @@
         "successUpdate": "Procedimiento actualizado con éxito",
         "error": "Error al procesar el procedimiento"
       }
+    },
+    "categories": {
+      "modalTitle": "Gestión de Categorías",
+      "newCategory": "Nueva Categoría",
+      "searchPlaceholder": "Buscar categoría...",
+      "emptyState": "Sin resultados",
+      "errorLoading": "No se pudieron cargar las categorías.",
+      "successUpdate": "Categoría actualizada exitosamente",
+      "successSave": "Categoría creada exitosamente",
+      "successDelete": "Categoría eliminada correctamente",
+      "editTitle": "Editar Categoría",
+      "createTitle": "Crear Categoría",
+      "formDescription": "Gestiona las categorías principales de tus procedimientos médicos.",
+      "mainData": "Datos Principales",
+      "labelName": "Nombre de la Categoría",
+      "helpName": "Este nombre será visible para tus pacientes en el blog.",
+      "labelSlug": "Identificador (Slug)",
+      "labelLang": "Idioma Base",
+      "btnDelete": "Eliminar Categoría",
+      "btnClear": "Limpiar Formulario",
+      "btnSave": "Guardar Cambios",
+      "btnCreate": "Crear Categoría"
     }
   },
   "auth": {
@@ -227,6 +292,9 @@
         "email_required": "El correo electrónico es obligatorio",
         "email_invalid": "Introduce un correo electrónico válido",
         "password_required": "La contraseña es obligatoria",
+        "password_min": "La contraseña debe tener al menos 8 caracteres",
+        "confirm_required": "Confirma tu contraseña",
+        "passwords_mismatch": "Las contraseñas no coinciden",
         "invalid_credentials": "Credenciales inválidas.",
         "server_error": "No se pudo conectar con el servidor.",
         "login_error": "Error de acceso",

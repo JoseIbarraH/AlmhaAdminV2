@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, computed, onMounted, watchEffect } from 'vue'
+import BlogCategoryModal from '~/components/blogs/BlogCategoryModal.vue'
 
 definePageMeta({
   middleware: ['auth']
@@ -9,6 +10,7 @@ const page = ref(1)
 const searchQuery = ref('')
 const selectedStatus = ref('')
 const isMenuOpen = ref(false)
+const isCategoryModalOpen = ref(false)
 const debouncedSearch = ref('')
 let debounceTimer: any = null
 
@@ -72,6 +74,7 @@ interface Blog {
     title: string
     content: string
   }[]
+  title: string
   writer: string
 }
 
@@ -86,6 +89,7 @@ interface ApiResponse {
 }
 
 // Fetch de datos reactivo con tipado
+const { locale } = useI18n()
 const { data: response, pending, refresh, error } = await useAsyncData<ApiResponse>(
   'blogs',
   () => useApi<ApiResponse>('/blogs', {
@@ -94,10 +98,13 @@ const { data: response, pending, refresh, error } = await useAsyncData<ApiRespon
       per_page: 8,
       search: debouncedSearch.value,
       status: selectedStatus.value
+    },
+    headers: {
+      'Accept-Language': locale.value.split('-')[0] || 'es'
     }
   }),
   {
-    watch: [page, debouncedSearch, selectedStatus]
+    watch: [page, debouncedSearch, selectedStatus, locale]
   }
 )
 
@@ -142,6 +149,14 @@ const formatDate = (dateString: string | null) => {
 const handleRefresh = () => {
   refresh()
 }
+
+const handleCategoriesUpdate = () => {
+  // Opcional: Podríamos recargar algo, pero la lista de blogs en sí misma
+  // no necesita recargarse solo porque una categoría se creó/editó, a menos que el
+  // nombre de la cat se mostrará cambiado (lo cual requiere refresh de blogs).
+  // Para mantener coherencia visual de nombres de categoría en las cards:
+  refresh()
+}
 </script>
 
 <template>
@@ -159,6 +174,10 @@ const handleRefresh = () => {
       <div class="header-actions">
         <button class="btn-refresh" :disabled="pending" @click="handleRefresh" :title="$t('blogs.header.refresh')">
           <UIcon name="i-heroicons-arrow-path" :class="{ 'animate-spin': pending }" class="icon-md" />
+        </button>
+        <button class="btn-ghost" @click="isCategoryModalOpen = true">
+          <UIcon name="i-heroicons-tag" class="icon-md" />
+          <span>{{ $t('blogs.form.category', 'Categorías') }}</span>
         </button>
         <NuxtLink to="/blogs/create" class="btn-primary">
           <UIcon name="i-heroicons-plus" class="icon-md" />
@@ -216,7 +235,7 @@ const handleRefresh = () => {
             <span class="date">{{ formatDate(blog.publishedAt) }}</span>
           </div>
 
-          <h2 class="card-title">{{ blog.translations?.[0]?.title || $t('blogs.card.noTitle') }}</h2>
+          <h2 class="card-title">{{ blog.title || $t('blogs.card.noTitle') }}</h2>
 
 
           <footer class="card-footer">
@@ -270,6 +289,9 @@ const handleRefresh = () => {
         </button>
       </div>
     </footer>
+
+    <!-- Modals -->
+    <BlogCategoryModal v-model="isCategoryModalOpen" @updated="handleCategoriesUpdate" />
   </div>
 </template>
 
@@ -387,6 +409,37 @@ const handleRefresh = () => {
 
 :root.dark .btn-primary:hover {
   background: #b89235;
+}
+
+.btn-ghost {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: #64748b;
+  padding: 0 1.5rem;
+  height: 44px;
+  border-radius: 12px;
+  font-weight: 600;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s;
+}
+
+:root.dark .btn-ghost {
+  color: #94a3b8;
+  border-color: #334155;
+}
+
+.btn-ghost:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+  border-color: #cbd5e1;
+}
+
+:root.dark .btn-ghost:hover {
+  background: #1e293b;
+  color: #f8fafc;
+  border-color: #475569;
 }
 
 /* Toolbar */

@@ -14,15 +14,24 @@ const loading = ref(false)
 const formRef = ref<any>(null)
 const blogId = route.params.id
 
+const editingLocale = ref<string>(locale.value)
+
 // Fetch blog data
 const { data: blogResponse, pending: loadingBlog, error } = await useAsyncData(
   `blog-${blogId}`,
   () => useApi<{ data: any }>(`/blogs/${blogId}`, {
     headers: {
-      'Accept-Language': locale.value
+      'Accept-Language': editingLocale.value
     }
-  })
+  }),
+  {
+    watch: [editingLocale]
+  }
 )
+
+const handleLanguageChange = (newLocale: string) => {
+  editingLocale.value = newLocale
+}
 
 const blogData = computed(() => blogResponse.value?.data || null)
 
@@ -61,13 +70,22 @@ const handleUpdate = async (formData: FormData) => {
 
 <template>
   <div class="edit-blog-page">
-    <header class="page-header mb-8">
+    <header class="page-header mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div class="flex items-center gap-4">
         <UButton icon="i-heroicons-arrow-left" variant="ghost" color="neutral" @click="router.back()" />
         <div>
           <h1 class="page-title">{{ t('blogs.form.editTitle') }}</h1>
           <p class="page-desc">{{ t('blogs.form.editDesc') }}</p>
         </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <UButton type="button" variant="ghost" color="neutral" size="lg" rounded="xl" @click="router.back()">
+          {{ t('blogs.form.cancel') }}
+        </UButton>
+        <UButton type="button" color="primary" size="lg" rounded="xl" class="px-8 font-bold" :loading="loading" @click="formRef?.handleSubmit()">
+          {{ t('blogs.form.update') }}
+        </UButton>
       </div>
     </header>
 
@@ -80,7 +98,7 @@ const handleUpdate = async (formData: FormData) => {
       <UButton @click="router.back()" class="mt-4">Volver</UButton>
     </div>
 
-    <BlogForm v-else ref="formRef" :initial-data="blogData" :is-edit="true" :loading="loading" @submit="handleUpdate" @cancel="router.back()" />
+    <BlogForm v-else ref="formRef" :initial-data="blogData" :is-edit="true" :loading="loading" @submit="handleUpdate" @cancel="router.back()" @change-language="handleLanguageChange" />
   </div>
 </template>
 

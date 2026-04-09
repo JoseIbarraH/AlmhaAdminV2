@@ -49,6 +49,7 @@ interface ApiResponse {
 }
 
 // Fetch de datos reactivo
+const { locale } = useI18n()
 const { data: response, pending, refresh, error } = await useAsyncData<ApiResponse>(
   'procedures',
   () => useApi<ApiResponse>('/procedures', {
@@ -60,7 +61,7 @@ const { data: response, pending, refresh, error } = await useAsyncData<ApiRespon
     }
   }),
   {
-    watch: [page, debouncedSearch, selectedStatus]
+    watch: [page, debouncedSearch, selectedStatus, locale]
   }
 )
 

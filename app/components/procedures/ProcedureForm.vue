@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import type { SelectItem } from '@nuxt/ui'
+import ProcedureCategoryModal from './ProcedureCategoryModal.vue'
 
 interface SectionItem {
   type: string
@@ -36,12 +37,17 @@ interface PostOpInstruction {
   order: number
 }
 
-interface GalleryItem {
-  type: string
-  pairId: number | null
+interface GalleryPair {
+  id: number | string // pair identifier
+  before: {
+    image: File | null
+    preview: string | null
+  }
+  after: {
+    image: File | null
+    preview: string | null
+  }
   order: number
-  image: File | null
-  imagePreview: string | null
 }
 
 const props = defineProps({
@@ -59,8 +65,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['submit', 'cancel'])
-const { t } = useI18n()
+const emit = defineEmits(['submit', 'cancel', 'change-language'])
 
 // Tabs Configuration
 const activeTab = ref('general')
@@ -68,25 +73,25 @@ const tabs = computed(() => [
   { id: 'general', label: t('procedures.form.tabs.general'), icon: 'i-heroicons-information-circle' },
   { id: 'sections', label: t('procedures.form.tabs.sections'), icon: 'i-heroicons-paper-clip' },
   { id: 'preparation', label: t('procedures.form.tabs.preparation'), icon: 'i-heroicons-clock' },
+  { id: 'recovery', label: t('procedures.form.tabs.recovery'), icon: 'i-heroicons-heart' },
   { id: 'instructions', label: t('procedures.form.faq.instructions.title'), icon: 'i-heroicons-shield-check' },
   { id: 'faq', label: t('procedures.form.faq.questions.title'), icon: 'i-heroicons-question-mark-circle' },
   { id: 'gallery', label: t('procedures.form.tabs.gallery'), icon: 'i-heroicons-photo' }
 ])
 
 // Helper for fixed sections
-const getEmptySection = (type: string, order: number): SectionItem => ({
+const getEmptySection = (type: string): SectionItem => ({
   type,
   title: '',
   contentOne: '',
   contentTwo: '',
-  order,
   image: null,
   imagePreview: null
 })
 
 const initSections = (): SectionItem[] => {
   const types = ['what_is', 'technique', 'recovery']
-  const sections = types.map((type, i) => getEmptySection(type, i))
+  const sections = types.map((type) => getEmptySection(type))
 
   if (props.initialData?.sections) {
     props.initialData.sections.forEach((s: any) => {
@@ -146,25 +151,136 @@ const form = ref({
     ?.filter((pi: any) => pi.type === 'dont')
     .map((pi: any, i: number) => ({ content: pi.translations?.[0]?.content || '', order: pi.order ?? i })) || []) as PostOpInstruction[],
 
-  gallery: (props.initialData?.gallery?.map((g: any, i: number) => ({
-    type: g.type,
-    pairId: g.pair_id,
-    order: g.order ?? i,
-    image: null as File | null,
-    imagePreview: g.path || null
-  })) || []) as GalleryItem[]
+  gallery: (() => {
+    if (!props.initialData?.gallery) return [] as GalleryPair[]
+    
+    const pairs: Record<string, any> = {}
+    props.initialData.gallery.forEach((g: any) => {
+      const pId = g.pair_id || Date.now() + Math.floor(Math.random() * 1000)
+      if (!pairs[pId]) {
+        pairs[pId] = {
+          id: pId,
+          before: { image: null, preview: null },
+          after: { image: null, preview: null },
+          order: g.order || 0
+        }
+      }
+      if (g.type === 'before') {
+        pairs[pId].before.preview = g.path
+      } else if (g.type === 'after') {
+        pairs[pId].after.preview = g.path
+      }
+    })
+    return Object.values(pairs).sort((a, b) => a.order - b.order) as GalleryPair[]
+  })()
 })
 
+// Emit language change to parent to trigger re-fetch in Edit mode
+watch(() => form.value.baseLang, (newLang) => {
+  if (props.isEdit) {
+    emit('change-language', newLang)
+  }
+})
+
+// Update form when initialData changes (for reactive re-fetches)
+watch(() => props.initialData, (newData) => {
+  if (!newData || !props.isEdit) return
+
+  // Basic Information
+  form.value.title = newData.translations?.[0]?.title || ''
+  form.value.subtitle = newData.translations?.[0]?.subtitle || ''
+  form.value.categoryCode = newData.categoryCode || ''
+  form.value.status = newData.status || 'draft'
+  // We maintain form.value.baseLang as it was what triggered the refresh
+
+  // Sections
+  const types = ['what_is', 'technique', 'recovery']
+  form.value.sections = types.map((type, i) => {
+    const s = newData.sections?.find((sec: any) => sec.type === type)
+    return {
+      type,
+      title: s?.translations?.[0]?.title || '',
+      contentOne: s?.translations?.[0]?.content_one || '',
+      contentTwo: s?.translations?.[0]?.content_two || '',
+      imagePreview: s?.image || null,
+      image: null
+    }
+  })
+
+  // FAQs
+  form.value.faqs = (newData.faqs?.map((f: any, i: number) => ({
+    question: f.translations?.[0]?.question || '',
+    answer: f.translations?.[0]?.answer || '',
+    order: f.order ?? i
+  })) || []) as FAQItem[]
+
+  // Preparation Steps
+  form.value.preparationSteps = (newData.preparationSteps?.map((ps: any, i: number) => ({
+    title: ps.translations?.[0]?.title || '',
+    description: ps.translations?.[0]?.description || '',
+    order: ps.order ?? i
+  })) || []) as PreparationStep[]
+
+  // Recovery Phases
+  form.value.recoveryPhases = (newData.recoveryPhases?.map((rp: any, i: number) => ({
+    period: rp.translations?.[0]?.period || '',
+    title: rp.translations?.[0]?.title || '',
+    description: rp.translations?.[0]?.description || '',
+    order: rp.order ?? i
+  })) || []) as RecoveryPhase[]
+
+  // Instructions
+  form.value.postOpDos = (newData.postoperativeInstructions
+    ?.filter((pi: any) => pi.type === 'do')
+    .map((pi: any, i: number) => ({ content: pi.translations?.[0]?.content || '', order: pi.order ?? i })) || []) as PostOpInstruction[]
+
+  form.value.postOpDonts = (newData.postoperativeInstructions
+    ?.filter((pi: any) => pi.type === 'dont')
+    .map((pi: any, i: number) => ({ content: pi.translations?.[0]?.content || '', order: pi.order ?? i })) || []) as PostOpInstruction[]
+
+  // Gallery
+  if (newData.gallery) {
+    const pairs: Record<string, any> = {}
+    newData.gallery.forEach((g: any) => {
+      const pId = g.pair_id || Date.now() + Math.floor(Math.random() * 1000)
+      if (!pairs[pId]) {
+        pairs[pId] = {
+          id: pId,
+          before: { image: null, preview: null },
+          after: { image: null, preview: null },
+          order: g.order || 0
+        }
+      }
+      if (g.type === 'before') {
+        pairs[pId].before.preview = g.path
+      } else if (g.type === 'after') {
+        pairs[pId].after.preview = g.path
+      }
+    })
+    form.value.gallery = Object.values(pairs).sort((a: any, b: any) => a.order - b.order) as GalleryPair[]
+  } else {
+    form.value.gallery = []
+  }
+
+  // Featured Image Preview
+  featuredImagePreview.value = newData.image || null
+}, { deep: true })
+
 // Categories
-const categories = ref<{ code: string, name: string }[]>([])
+const isCategoryModalOpen = ref(false)
+const categories = ref<{ value: string, label: string }[]>([])
 const loadingCategories = ref(false)
 const fetchCategories = async () => {
   loadingCategories.value = true
   try {
-    const response = await useApi<any>('/procedure-categories')
+    const response = await useApi<any>('/procedure-categories', {
+      headers: {
+        'Accept-Language': form.value.baseLang
+      }
+    })
     categories.value = response.data.map((cat: any) => ({
-      code: cat.code,
-      name: cat.translations?.[0]?.title || cat.code
+      value: cat.code,
+      label: cat.translations?.[0]?.title || cat.code
     }))
   } catch (error) {
     console.error('Error fetching categories:', error)
@@ -172,6 +288,16 @@ const fetchCategories = async () => {
     loadingCategories.value = false
   }
 }
+
+const { t, locale } = useI18n()
+
+watch(() => form.value.baseLang, () => {
+  fetchCategories()
+})
+watch(locale, (newLocale) => {
+  form.value.baseLang = newLocale.split('-')[0] || 'es'
+  fetchCategories()
+})
 
 onMounted(fetchCategories)
 
@@ -203,7 +329,28 @@ const addStep = () => addItem('preparationSteps', { title: '', description: '' }
 const addPhase = () => addItem('recoveryPhases', { period: '', title: '', description: '' })
 const addDo = () => addItem('postOpDos', { content: '' })
 const addDont = () => addItem('postOpDonts', { content: '' })
-const addGalleryItem = () => addItem('gallery', { type: 'general', pairId: null, image: null, imagePreview: null })
+const addGalleryPair = () => {
+  form.value.gallery.push({
+    id: Date.now() + Math.floor(Math.random() * 1000),
+    before: { image: null, preview: null },
+    after: { image: null, preview: null },
+    order: form.value.gallery.length
+  })
+}
+
+const removeGalleryPair = (idx: number) => {
+  form.value.gallery.splice(idx, 1)
+  form.value.gallery.forEach((p, i) => p.order = i)
+}
+
+const handlePairImage = (idx: number, type: 'before' | 'after', e: Event) => {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (file && form.value.gallery[idx]) {
+    form.value.gallery[idx][type].image = file
+    form.value.gallery[idx][type].preview = URL.createObjectURL(file)
+  }
+}
+
 
 const handleSectionImage = (index: number, e: Event) => {
   const file = (e.target as HTMLInputElement).files?.[0]
@@ -211,15 +358,6 @@ const handleSectionImage = (index: number, e: Event) => {
   if (file && section) {
     section.image = file
     section.imagePreview = URL.createObjectURL(file)
-  }
-}
-
-const handleGalleryImage = (index: number, e: Event) => {
-  const file = (e.target as HTMLInputElement).files?.[0]
-  const item = form.value.gallery[index]
-  if (file && item) {
-    item.image = file
-    item.imagePreview = URL.createObjectURL(file)
   }
 }
 
@@ -238,7 +376,6 @@ const handleSubmit = () => {
     formData.append(`sections[${i}][title]`, s.title)
     formData.append(`sections[${i}][contentOne]`, s.contentOne)
     formData.append(`sections[${i}][contentTwo]`, s.contentTwo)
-    formData.append(`sections[${i}][order]`, String(s.order))
     if (s.image) formData.append(`sections[${i}][image]`, s.image)
   })
 
@@ -272,11 +409,18 @@ const handleSubmit = () => {
     formData.append(`postoperativeInstructions[${i}][order]`, String(pi.order))
   })
 
-  form.value.gallery.forEach((g: GalleryItem, i: number) => {
-    formData.append(`gallery[${i}][type]`, g.type)
-    formData.append(`gallery[${i}][order]`, String(g.order))
-    if (g.pairId) formData.append(`gallery[${i}][pairId]`, String(g.pairId))
-    if (g.image) formData.append(`gallery[${i}][path]`, g.image)
+  form.value.gallery.forEach((pair: GalleryPair, i: number) => {
+    // Send before
+    formData.append(`gallery[${i * 2}][type]`, 'before')
+    formData.append(`gallery[${i * 2}][order]`, String(i))
+    formData.append(`gallery[${i * 2}][pairId]`, String(pair.id))
+    if (pair.before.image) formData.append(`gallery[${i * 2}][path]`, pair.before.image)
+
+    // Send after
+    formData.append(`gallery[${i * 2 + 1}][type]`, 'after')
+    formData.append(`gallery[${i * 2 + 1}][order]`, String(i))
+    formData.append(`gallery[${i * 2 + 1}][pairId]`, String(pair.id))
+    if (pair.after.image) formData.append(`gallery[${i * 2 + 1}][path]`, pair.after.image)
   })
 
   emit('submit', formData)
@@ -365,9 +509,13 @@ const statusItems = ref<SelectItem[]>([
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 pt-4">
                     <div class="hero-field-group">
                       <label class="premium-hero-label">{{ t('procedures.form.general.category') }}</label>
-                      <USelectMenu v-model="form.categoryCode" :options="categories" option-attribute="name"
-                        value-attribute="code" :placeholder="t('procedures.form.general.selectCategory')"
-                        :loading="loadingCategories" size="xl" class="premium-hero-select" rounded="xl" />
+                      <div class="flex items-center gap-2">
+                        <USelectMenu v-model="form.categoryCode" :items="categories" value-key="value"
+                          :search-input="{ placeholder: t('procedures.categories.searchPlaceholder') }"
+                          :placeholder="t('procedures.form.general.selectCategory')"
+                          :loading="loadingCategories" size="xl" class="premium-hero-select flex-1" rounded="xl" />
+                        <UButton icon="i-heroicons-cog-6-tooth" color="neutral" variant="soft" @click="isCategoryModalOpen = true" :title="t('procedures.categories.modalTitle')" />
+                      </div>
                     </div>
 
                     <div class="hero-field-group">
@@ -380,6 +528,18 @@ const statusItems = ref<SelectItem[]>([
                         rounded="xl" 
                       />
                     </div>
+
+                    <div class="hero-field-group">
+                      <label class="premium-hero-label">{{ t('procedures.categories.labelLang', 'Idioma del contenido') }}</label>
+                      <UInput 
+                        :model-value="locale === 'es' ? 'Español (ES)' : 'English (EN)'" 
+                        readonly 
+                        icon="i-heroicons-language" 
+                        size="xl" 
+                        class="premium-hero-input-readonly" 
+                        rounded="xl" 
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -389,7 +549,7 @@ const statusItems = ref<SelectItem[]>([
                 <div /> <!-- spacer -->
                 <UButton color="primary" variant="subtle" size="xl" rounded="xl" @click="activeTab = 'sections'"
                   class="px-10 font-bold">
-                  {{ t('procedures.form.pagination.next') || 'Siguiente' }}
+                  {{ t('procedures.form.pagination.next') }}
                   <UIcon name="i-heroicons-arrow-right" class="ml-2" />
                 </UButton>
               </div>
@@ -453,7 +613,7 @@ const statusItems = ref<SelectItem[]>([
                     <img v-if="section.imagePreview" :src="section.imagePreview" class="main-img" />
                     <div v-else class="empty-plate-vibe">
                       <UIcon name="i-heroicons-camera" class="text-4xl opacity-20" />
-                      <span class="text-xs uppercase tracking-widest font-bold opacity-30 mt-2">Upload Visual</span>
+                      <span class="text-xs uppercase tracking-widest font-bold opacity-30 mt-2">{{ t('procedures.form.sections.uploadVisual') }}</span>
                     </div>
                     <label class="full-screen-overlay">
                       <input type="file" class="hidden" @change="handleSectionImage(idx as number, $event)" />
@@ -483,81 +643,123 @@ const statusItems = ref<SelectItem[]>([
             </div>
           </div>
 
-          <!-- Tab Nav Buttons -->
           <div class="tab-internal-nav mt-12">
             <UButton variant="ghost" color="neutral" @click="activeTab = 'general'">
-              {{ t('procedures.form.pagination.prev') || 'Anterior' }}
+              {{ t('procedures.form.pagination.prev') }}
             </UButton>
             <UButton color="primary" variant="subtle" @click="activeTab = 'preparation'">
-              {{ t('procedures.form.pagination.next') || 'Siguiente' }}
+              {{ t('procedures.form.pagination.next') }}
             </UButton>
           </div>
         </section>
 
-        <!-- Preparation & Recovery -->
+        <!-- Preparation Tab -->
         <section v-else-if="activeTab === 'preparation'" key="preparation" class="tab-pane">
-          <div class="max-w-4xl mx-auto space-y-10">
-            <!-- Preparation Steps -->
-            <div class="premium-list-card">
-              <header class="list-card-header">
-                <div class="flex items-center gap-3">
-                  <UIcon name="i-heroicons-clock" class="text-gold" />
-                  <h3 class="title">{{ t('procedures.form.preparation.steps.title') }}</h3>
-                </div>
-                <UButton icon="i-heroicons-plus" size="xs" color="neutral" variant="ghost" @click="addStep" />
-              </header>
+          <div class="max-w-4xl mx-auto">
+            <header class="tab-header-v3 mb-10 flex justify-between items-end">
+              <div>
+                <h2 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white">{{ t('procedures.form.preparation.steps.title') }}</h2>
+                <p class="text-slate-500 mt-2">{{ t('procedures.form.preparation.steps.description') }}</p>
+              </div>
+              <UButton @click="addStep" color="primary" variant="soft" icon="i-heroicons-plus-circle" size="lg" rounded="xl" class="font-bold">
+                {{ t('procedures.form.preparation.steps.add') }}
+              </UButton>
+            </header>
 
-              <div class="list-items space-y-4 mt-6" v-auto-animate>
-                <div v-for="(step, idx) in form.preparationSteps" :key="idx" class="sub-item-box">
-                  <div class="flex items-center gap-4 mb-3">
+            <div class="stepper-vertical-wrapper" v-auto-animate>
+              <div v-for="(step, idx) in form.preparationSteps" :key="idx" class="stepper-item-v3">
+                <div class="stepper-aside">
+                  <div class="stepper-node-bubble preparation-node">
+                    <span class="node-number">{{ idx + 1 }}</span>
+                  </div>
+                  <div v-if="idx < form.preparationSteps.length - 1" class="stepper-connector-line" />
+                </div>
+                
+                <div class="stepper-content-card glass-card-v3">
+                  <div class="flex items-center gap-4 mb-4">
                     <UInput v-model="step.title" :placeholder="t('procedures.form.preparation.steps.stepTitle')"
-                      class="flex-1 premium-input-sm" />
-                    <button type="button" class="trash-icon-btn" @click="removeItem('preparationSteps', idx as number)">
-                      <UIcon name="i-heroicons-trash" />
-                    </button>
+                      variant="none" class="stepper-title-input flex-1" />
+                    <UButton icon="i-heroicons-trash" color="error" variant="ghost" size="sm" @click="removeItem('preparationSteps', idx as number)" class="opacity-30 hover:opacity-100" />
                   </div>
                   <UTextarea v-model="step.description"
-                    :placeholder="t('procedures.form.preparation.steps.description')" :rows="2"
-                    class="premium-textarea-sm" />
+                    :placeholder="t('procedures.form.preparation.steps.stepDescription')" :rows="3"
+                    variant="none" class="stepper-desc-textarea w-full" />
                 </div>
+              </div>
+
+              <!-- Empty State -->
+              <div v-if="form.preparationSteps.length === 0" class="empty-stepper-vibe">
+                <div class="vibe-icon-wrapper">
+                  <UIcon name="i-heroicons-clock" class="text-4xl text-slate-300" />
+                </div>
+                <p>{{ t('procedures.form.preparation.steps.empty') }}</p>
               </div>
             </div>
 
-            <!-- Recovery Phases -->
-            <div class="premium-list-card">
-              <header class="list-card-header">
-                <div class="flex items-center gap-3">
-                  <UIcon name="i-heroicons-heart" class="text-gold" />
-                  <h3 class="title">{{ t('procedures.form.preparation.recovery.title') }}</h3>
-                </div>
-                <UButton icon="i-heroicons-plus" size="xs" color="neutral" variant="ghost" @click="addPhase" />
-              </header>
+            <div class="tab-internal-nav mt-12">
+              <UButton variant="ghost" color="neutral" size="xl" @click="activeTab = 'sections'">
+                {{ t('procedures.form.pagination.prev') }}
+              </UButton>
+              <UButton color="primary" variant="subtle" size="xl" rounded="xl" @click="activeTab = 'recovery'" class="px-8 font-bold">
+                {{ t('procedures.form.pagination.next') }}
+                <UIcon name="i-heroicons-arrow-right" class="ml-2" />
+              </UButton>
+            </div>
+          </div>
+        </section>
 
-              <div class="list-items space-y-4 mt-6" v-auto-animate>
-                <div v-for="(phase, idx) in form.recoveryPhases" :key="idx" class="sub-item-box">
-                  <div class="grid grid-cols-[120px_1fr_40px] items-center gap-3 mb-3">
-                    <UInput v-model="phase.period" :placeholder="t('procedures.form.preparation.recovery.period')"
-                      class="premium-input-sm" />
-                    <UInput v-model="phase.title" :placeholder="t('procedures.form.preparation.recovery.phaseTitle')"
-                      class="premium-input-sm" />
-                    <button type="button" class="trash-icon-btn" @click="removeItem('recoveryPhases', idx as number)">
-                      <UIcon name="i-heroicons-trash" />
-                    </button>
+        <!-- Recovery Tab -->
+        <section v-else-if="activeTab === 'recovery'" key="recovery" class="tab-pane">
+          <div class="max-w-4xl mx-auto">
+            <header class="tab-header-v3 mb-10 flex justify-between items-end">
+              <div>
+                <h2 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white">{{ t('procedures.form.recovery.phases.title') }}</h2>
+                <p class="text-slate-500 mt-2">{{ t('procedures.form.recovery.phases.description') }}</p>
+              </div>
+              <UButton @click="addPhase" color="primary" variant="soft" icon="i-heroicons-plus-circle" size="lg" rounded="xl" class="font-bold">
+                {{ t('procedures.form.recovery.phases.add') }}
+              </UButton>
+            </header>
+
+            <div class="stepper-vertical-wrapper" v-auto-animate>
+              <div v-for="(phase, idx) in form.recoveryPhases" :key="idx" class="stepper-item-v3">
+                <div class="stepper-aside">
+                  <div class="stepper-node-bubble recovery-node">
+                    <span class="node-number">{{ idx + 1 }}</span>
+                  </div>
+                  <div v-if="idx < form.recoveryPhases.length - 1" class="stepper-connector-line" />
+                </div>
+                
+                <div class="stepper-content-card glass-card-v3">
+                  <div class="grid grid-cols-[140px_1fr_40px] items-center gap-6 mb-4">
+                    <UInput v-model="phase.period" :placeholder="t('procedures.form.recovery.phases.period')"
+                      variant="none" class="stepper-period-input" />
+                    <UInput v-model="phase.title" :placeholder="t('procedures.form.recovery.phases.phaseTitle')"
+                      variant="none" class="stepper-title-input" />
+                    <UButton icon="i-heroicons-trash" color="error" variant="ghost" size="sm" @click="removeItem('recoveryPhases', idx as number)" class="opacity-30 hover:opacity-100" />
                   </div>
                   <UTextarea v-model="phase.description"
-                    :placeholder="t('procedures.form.preparation.recovery.description')" :rows="2"
-                    class="premium-textarea-sm" />
+                    :placeholder="t('procedures.form.recovery.phases.phaseDescription')" :rows="3"
+                    variant="none" class="stepper-desc-textarea w-full" />
                 </div>
+              </div>
+
+              <!-- Empty State -->
+              <div v-if="form.recoveryPhases.length === 0" class="empty-stepper-vibe">
+                <div class="vibe-icon-wrapper">
+                  <UIcon name="i-heroicons-heart" class="text-4xl text-slate-300" />
+                </div>
+                <p>{{ t('procedures.form.recovery.phases.empty') }}</p>
               </div>
             </div>
 
-            <!-- Tab Nav Buttons -->
-            <div class="tab-internal-nav">
-              <UButton variant="ghost" color="neutral" @click="activeTab = 'sections'">
-                {{ t('procedures.form.pagination.prev') || 'Anterior' }}
+            <div class="tab-internal-nav mt-12">
+              <UButton variant="ghost" color="neutral" size="xl" @click="activeTab = 'preparation'">
+                {{ t('procedures.form.pagination.prev') }}
               </UButton>
-              <UButton color="primary" variant="subtle" @click="activeTab = 'instructions'">
-                {{ t('procedures.form.pagination.next') || 'Siguiente' }}
+              <UButton color="primary" variant="subtle" size="xl" rounded="xl" @click="activeTab = 'instructions'" class="px-8 font-bold">
+                {{ t('procedures.form.pagination.next') }}
+                <UIcon name="i-heroicons-arrow-right" class="ml-2" />
               </UButton>
             </div>
           </div>
@@ -611,13 +813,12 @@ const statusItems = ref<SelectItem[]>([
               </div>
             </div>
 
-            <!-- Tab Nav Buttons -->
             <div class="tab-internal-nav">
-              <UButton variant="ghost" color="neutral" @click="activeTab = 'preparation'">
-                {{ t('procedures.form.pagination.prev') || 'Anterior' }}
+              <UButton variant="ghost" color="neutral" @click="activeTab = 'recovery'">
+                {{ t('procedures.form.pagination.prev') }}
               </UButton>
               <UButton color="primary" variant="subtle" @click="activeTab = 'faq'">
-                {{ t('procedures.form.pagination.next') || 'Siguiente' }}
+                {{ t('procedures.form.pagination.next') }}
               </UButton>
             </div>
           </div>
@@ -625,39 +826,55 @@ const statusItems = ref<SelectItem[]>([
 
         <!-- FAQ Tab -->
         <section v-else-if="activeTab === 'faq'" key="faq" class="tab-pane">
-          <div class="max-w-4xl mx-auto space-y-10">
-            <!-- FAQ -->
-            <div class="premium-list-card">
-              <header class="list-card-header">
-                <div class="flex items-center gap-3">
-                  <UIcon name="i-heroicons-question-mark-circle" class="text-gold" />
-                  <h3 class="title">{{ t('procedures.form.faq.questions.title') }}</h3>
-                </div>
-                <UButton icon="i-heroicons-plus" size="xs" color="neutral" variant="ghost" @click="addFaq" />
-              </header>
+          <div class="max-w-4xl mx-auto">
+            <header class="tab-header-v3 mb-10 flex justify-between items-end">
+              <div>
+                <h2 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white">{{ t('procedures.form.faq.questions.title') }}</h2>
+                <p class="text-slate-500 mt-2">{{ t('procedures.form.faq.questions.description') }}</p>
+              </div>
+              <UButton @click="addFaq" color="primary" variant="soft" icon="i-heroicons-plus-circle" size="lg" rounded="xl" class="font-bold">
+                {{ t('procedures.form.faq.questions.add') }}
+              </UButton>
+            </header>
 
-              <div class="list-items space-y-4 mt-6" v-auto-animate>
-                <div v-for="(faq, idx) in form.faqs" :key="idx" class="sub-item-box">
-                  <div class="flex items-center gap-4 mb-3">
+            <div class="faq-premium-stack" v-auto-animate>
+              <div v-for="(faq, idx) in form.faqs" :key="idx" class="faq-card-v3 glass-card-v3">
+                <div class="faq-card-body">
+                  <!-- Question Row -->
+                  <div class="faq-row question-row">
+                    <div class="faq-indicator q-indicator">Q</div>
                     <UInput v-model="faq.question" :placeholder="t('procedures.form.faq.questions.question')"
-                      class="flex-1 premium-input-sm" />
-                    <button type="button" class="trash-icon-btn" @click="removeItem('faqs', idx as number)">
-                      <UIcon name="i-heroicons-trash" />
-                    </button>
+                      variant="none" class="faq-input flex-1" />
+                    <UButton icon="i-heroicons-trash" color="error" variant="ghost" size="sm" @click="removeItem('faqs', idx as number)" class="opacity-30 hover:opacity-100" />
                   </div>
-                  <UTextarea v-model="faq.answer" :placeholder="t('procedures.form.faq.questions.answer')" :rows="2"
-                    class="premium-textarea-sm" />
+                  
+                  <!-- Answer Row -->
+                  <div class="faq-row answer-row">
+                    <div class="faq-indicator a-indicator">
+                      <UIcon name="i-heroicons-chat-bubble-bottom-center-text" />
+                    </div>
+                    <UTextarea v-model="faq.answer" :placeholder="t('procedures.form.faq.questions.answer')" :rows="3"
+                      variant="none" class="faq-textarea w-full" />
+                  </div>
                 </div>
+              </div>
+
+              <!-- Empty State -->
+              <div v-if="form.faqs.length === 0" class="empty-faq-vibe">
+                <div class="vibe-icon-wrapper">
+                  <UIcon name="i-heroicons-question-mark-circle" class="text-4xl text-slate-300" />
+                </div>
+                <p>{{ t('procedures.form.faq.questions.empty') }}</p>
               </div>
             </div>
 
-            <!-- Tab Nav Buttons -->
-            <div class="tab-internal-nav">
-              <UButton variant="ghost" color="neutral" @click="activeTab = 'instructions'">
-                {{ t('procedures.form.pagination.prev') || 'Anterior' }}
+            <div class="tab-internal-nav mt-12">
+              <UButton variant="ghost" color="neutral" size="xl" @click="activeTab = 'instructions'">
+                {{ t('procedures.form.pagination.prev') }}
               </UButton>
-              <UButton color="primary" variant="subtle" @click="activeTab = 'gallery'">
-                {{ t('procedures.form.pagination.next') || 'Siguiente' }}
+              <UButton color="primary" variant="subtle" size="xl" rounded="xl" @click="activeTab = 'gallery'" class="px-8 font-bold">
+                {{ t('procedures.form.pagination.next') }}
+                <UIcon name="i-heroicons-arrow-right" class="ml-2" />
               </UButton>
             </div>
           </div>
@@ -665,44 +882,66 @@ const statusItems = ref<SelectItem[]>([
 
         <!-- Gallery Tab -->
         <section v-else-if="activeTab === 'gallery'" key="gallery" class="tab-pane">
-          <div class="list-head">
-            <div class="head-info">
-              <h2 class="pane-heading">{{ t('procedures.form.tabs.gallery') }}</h2>
-            </div>
-            <UButton icon="i-heroicons-plus" color="primary" variant="solid" size="lg" rounded="xl"
-              @click="addGalleryItem" class="premium-btn-action">
+          <div class="list-head mb-10 text-center flex flex-col items-center">
+            <h2 class="pane-heading text-3xl font-black">{{ t('procedures.form.tabs.gallery') }}</h2>
+            <p class="text-slate-500 mt-2 mb-6">{{ t('procedures.form.gallery.description') }}</p>
+            <UButton icon="i-heroicons-plus" color="primary" variant="soft" size="lg" rounded="xl"
+              @click="addGalleryPair" class="font-bold px-10">
               {{ t('procedures.form.gallery.add') }}
             </UButton>
           </div>
 
-          <div class="gallery-premium-grid mt-10" v-auto-animate>
-            <div v-for="(item, idx) in form.gallery" :key="idx" class="gallery-card">
-              <div class="gallery-visual">
-                <img v-if="item.imagePreview" :src="item.imagePreview" class="gallery-img" />
-                <div v-else class="gallery-empty-vibe">
-                  <UIcon name="i-heroicons-photo" class="text-3xl opacity-30" />
+          <div class="gallery-grid-v4" v-auto-animate>
+            <div v-for="(pair, idx) in form.gallery" :key="pair.id" class="gallery-item-v4 glass-card-v3">
+              <header class="item-header-v4">
+                <div class="item-badge-v4">{{ t('procedures.form.gallery.case') }}{{ String(idx + 1).padStart(2, '0') }}</div>
+                <UButton icon="i-heroicons-trash" color="error" variant="ghost" size="xs" @click="removeGalleryPair(idx)" 
+                  class="opacity-30 hover:opacity-100 transition-opacity" />
+              </header>
+
+              <div class="item-upload-grid">
+                <!-- Before -->
+                <div class="mini-upload-v4">
+                  <span class="label-v4 before">{{ t('procedures.form.gallery.before') }}</span>
+                  <div class="mini-plate-v4" :class="{ 'has-image': !!pair.before.preview }">
+                    <img v-if="pair.before.preview" :src="pair.before.preview" class="mini-img-v4" />
+                    <div v-else class="upload-vibe-v4">
+                      <UIcon name="i-heroicons-camera" />
+                    </div>
+                    <label class="plate-click-layer">
+                      <input type="file" class="hidden" @change="handlePairImage(idx, 'before', $event)" />
+                    </label>
+                  </div>
                 </div>
-                <label class="plate-overlay">
-                  <input type="file" class="hidden" @change="handleGalleryImage(idx as number, $event)" />
-                </label>
-                <button type="button" class="remove-mini-btn" @click="removeItem('gallery', idx as number)">
-                  <UIcon name="i-heroicons-x-mark" />
-                </button>
+
+                <!-- After -->
+                <div class="mini-upload-v4">
+                  <span class="label-v4 after">{{ t('procedures.form.gallery.after') }}</span>
+                  <div class="mini-plate-v4" :class="{ 'has-image': !!pair.after.preview }">
+                    <img v-if="pair.after.preview" :src="pair.after.preview" class="mini-img-v4" />
+                    <div v-else class="upload-vibe-v4">
+                      <UIcon name="i-heroicons-camera" />
+                    </div>
+                    <label class="plate-click-layer">
+                      <input type="file" class="hidden" @change="handlePairImage(idx, 'after', $event)" />
+                    </label>
+                  </div>
+                </div>
               </div>
-              <div
-                class="gallery-content px-4 py-3 bg-slate-50/50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800">
-                <USelectMenu v-model="item.type"
-                  :options="[{ label: t('procedures.form.gallery.beforeAfter'), value: 'before_after' }, { label: t('procedures.form.gallery.general'), value: 'general' }]"
-                  size="xs" class="mb-2" />
-                <UInput v-if="item.type === 'before_after'" v-model="item.pairId" placeholder="Pair ID" size="xs"
-                  type="number" color="neutral" />
+            </div>
+
+            <!-- Empty State -->
+            <div v-if="form.gallery.length === 0" class="empty-gallery-vibe-v3 col-span-full">
+              <div class="vibe-icon-wrapper">
+                <UIcon name="i-heroicons-photo" class="text-4xl text-slate-300" />
               </div>
+              <p>{{ t('procedures.form.gallery.empty') }}</p>
             </div>
           </div>
 
           <!-- Tab Nav Buttons -->
-          <div class="tab-internal-nav mt-10">
-            <UButton variant="ghost" color="neutral" @click="activeTab = 'faq'">
+          <div class="tab-internal-nav mt-16">
+            <UButton variant="ghost" color="neutral" size="xl" @click="activeTab = 'faq'">
               {{ t('procedures.form.pagination.prev') || 'Anterior' }}
             </UButton>
             <div /> <!-- spacer -->
@@ -723,6 +962,8 @@ const statusItems = ref<SelectItem[]>([
         </UButton>
       </div>
     </div>
+    
+    <ProcedureCategoryModal v-model="isCategoryModalOpen" @updated="fetchCategories" />
   </form>
 </template>
 
@@ -1814,5 +2055,455 @@ const statusItems = ref<SelectItem[]>([
   .tab-internal-nav {
     padding-top: 2rem;
   }
+}
+/* Premium Stepper V3 */
+.stepper-vertical-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding-left: 1rem;
+}
+
+.stepper-item-v3 {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  align-items: start;
+  gap: 1.5rem;
+}
+
+.stepper-aside {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  padding-top: 0.75rem;
+}
+
+.stepper-node-bubble {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 2;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+:root.dark .stepper-node-bubble {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 10px 25px -10px rgba(0, 0, 0, 0.5);
+}
+
+.preparation-node {
+  border-bottom: 3px solid #fbbf24; /* yellow-400 */
+}
+
+.recovery-node {
+  border-bottom: 3px solid #f43f5e; /* rose-500 */
+}
+
+.node-number {
+  font-weight: 900;
+  font-size: 1.25rem;
+  color: #1e293b;
+}
+
+:root.dark .node-number {
+  color: white;
+}
+
+.stepper-connector-line {
+  flex: 1;
+  width: 2px;
+  background: #e2e8f0;
+  margin: 1.5rem 0 -2.5rem 0;
+  position: relative;
+  opacity: 0.5;
+}
+
+:root.dark .stepper-connector-line {
+  background: #334155;
+}
+
+.stepper-content-card {
+  padding: 1.5rem 2rem;
+  border-radius: 24px;
+  transition: all 0.3s;
+}
+
+.glass-card-v3 {
+  background: white;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 10px 15px -3px rgba(0, 0, 0, 0.03);
+}
+
+:root.dark .glass-card-v3 {
+  background: rgba(30, 41, 59, 0.4);
+  backdrop-filter: blur(10px);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.stepper-item-v3:hover .stepper-content-card {
+  transform: translateX(10px);
+  border-color: #fbbf24;
+  box-shadow: 0 20px 40px -20px rgba(251, 191, 36, 0.15);
+}
+
+.stepper-item-v3:hover .stepper-node-bubble {
+  transform: scale(1.1) rotate(5deg);
+  border-color: #fbbf24;
+}
+
+/* Field Inputs inside Stepper */
+.stepper-title-input :deep(input) {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1e293b;
+  padding: 0 !important;
+  background: transparent !important;
+  border-bottom: 1px dashed #e2e8f0 !important;
+  border-radius: 0 !important;
+}
+
+:root.dark .stepper-title-input :deep(input) {
+  color: white;
+  border-bottom-color: #334155 !important;
+}
+
+.stepper-period-input :deep(input) {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fbbf24; /* yellow-400 */
+  padding: 0.5rem 1rem !important;
+  background: #fffbeb !important; /* yellow-50 */
+  border: none !important;
+  border-radius: 12px !important;
+  text-align: center;
+}
+
+:root.dark .stepper-period-input :deep(input) {
+  background: rgba(251, 191, 36, 0.1) !important;
+}
+
+.stepper-desc-textarea :deep(textarea) {
+  width: 100%;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #64748b;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+:root.dark .stepper-desc-textarea :deep(textarea) {
+  color: #94a3b8;
+}
+
+.empty-stepper-vibe {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: #f8fafc;
+  border-radius: 32px;
+  border: 2px dashed #e2e8f0;
+  color: #94a3b8;
+}
+
+:root.dark .empty-stepper-vibe {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.vibe-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem auto;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+}
+
+:root.dark .vibe-icon-wrapper {
+  background: #1e293b;
+}
+/* FAQ Premium V3 */
+.faq-premium-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.faq-card-v3 {
+  border-radius: 32px;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.faq-card-v3:hover {
+  transform: translateY(-5px);
+  border-color: #fbbf24;
+  box-shadow: 0 20px 40px -15px rgba(251, 191, 36, 0.1);
+}
+
+.faq-card-body {
+  padding: 1.5rem 2rem;
+}
+
+.faq-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
+
+.question-row {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+:root.dark .question-row {
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.faq-indicator {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.q-indicator {
+  background: white;
+  border: 1px solid #e2e8f0;
+  color: #1e293b;
+  font-size: 1rem;
+}
+
+:root.dark .q-indicator {
+  background: #1e293b;
+  border-color: #334155;
+  color: white;
+}
+
+.a-indicator {
+  background: #fffbeb;
+  color: #fbbf24;
+  font-size: 1.25rem;
+}
+
+:root.dark .a-indicator {
+  background: rgba(251, 191, 36, 0.1);
+}
+
+.faq-input :deep(input) {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #1e293b;
+  padding: 0.5rem 0 !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+:root.dark .faq-input :deep(input) {
+  color: white;
+}
+
+.faq-textarea :deep(textarea) {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #64748b;
+  padding: 0.5rem 0 !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+:root.dark .faq-textarea :deep(textarea) {
+  color: #94a3b8;
+}
+
+.empty-faq-vibe {
+  text-align: center;
+  padding: 5rem 2rem;
+  background: #f8fafc;
+  border-radius: 40px;
+  border: 2px dashed #e2e8f0;
+  color: #94a3b8;
+}
+
+:root.dark .empty-faq-vibe {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.faq-card-v3:hover .q-indicator {
+  background: #fbbf24;
+  border-color: #fbbf24;
+  color: white;
+  transform: rotate(-5deg) scale(1.1);
+}
+/* Gallery Premium V4 Grid Extension */
+.gallery-grid-v4 {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 2.5rem;
+}
+
+@media (min-width: 640px) {
+  .gallery-grid-v4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .gallery-grid-v4 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.gallery-item-v4 {
+  padding: 1.5rem;
+  border-radius: 32px;
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.gallery-item-v4:hover {
+  transform: translateY(-8px);
+  border-color: #fbbf24;
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.1);
+}
+
+.item-header-v4 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.item-badge-v4 {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 4px 12px;
+  border-radius: 10px;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+}
+
+:root.dark .item-badge-v4 {
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+.item-upload-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.mini-upload-v4 {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.label-v4 {
+  font-size: 0.6rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 2px 8px;
+  border-radius: 6px;
+  width: fit-content;
+}
+
+.label-v4.before {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.label-v4.after {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+:root.dark .label-v4.before {
+  background: #334155;
+}
+
+:root.dark .label-v4.after {
+  background: rgba(251, 191, 36, 0.1);
+}
+
+.mini-plate-v4 {
+  aspect-ratio: 1;
+  background: #f8fafc;
+  border-radius: 20px;
+  border: 2px dashed #e2e8f0;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+:root.dark .mini-plate-v4 {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+.mini-plate-v4.has-image {
+  border-style: solid;
+  border-color: transparent;
+}
+
+.mini-img-v4 {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.upload-vibe-v4 {
+  font-size: 1.5rem;
+  color: #cbd5e1;
+}
+
+.plate-click-layer {
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+  z-index: 5;
+}
+
+.plate-click-layer:hover {
+  background: rgba(251, 191, 36, 0.05);
+}
+
+.empty-gallery-vibe-v3 {
+  text-align: center;
+  padding: 6rem 2rem;
+  background: #f8fafc;
+  border-radius: 40px;
+  border: 2px dashed #e2e8f0;
+  color: #94a3b8;
+}
+
+:root.dark .empty-gallery-vibe-v3 {
+  background: #0f172a;
+  border-color: #1e293b;
 }
 </style>

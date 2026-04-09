@@ -11,11 +11,24 @@ const { t } = useI18n()
 const toast = useToast()
 
 const id = route.params.id as string
+const { locale } = useI18n()
+const editingLocale = ref<string>(locale.value)
 
 const { data: procedure, pending, error } = await useAsyncData(
-  `procedure-${id}`,
-  () => useApi(`/procedures/${id}`)
+  `procedure-${id}-${editingLocale.value}`,
+  () => useApi(`/procedures/${id}`, {
+    headers: {
+      'Accept-Language': editingLocale.value
+    }
+  }),
+  {
+    watch: [editingLocale]
+  }
 )
+
+const handleLanguageChange = (newLocale: string) => {
+  editingLocale.value = newLocale
+}
 
 const updating = ref(false)
 
@@ -69,7 +82,7 @@ const handleUpdate = async (formData: FormData) => {
        <UButton class="mt-4" @click="router.back()">{{ t('procedures.form.actions.cancel') }}</UButton>
     </div>
 
-    <ProcedureForm v-else :initial-data="procedure.data" :is-edit="true" :loading="updating" @submit="handleUpdate" @cancel="router.back()" />
+    <ProcedureForm v-else :initial-data="procedure.data" :is-edit="true" :loading="updating" @submit="handleUpdate" @cancel="router.back()" @change-language="handleLanguageChange" />
   </div>
 </template>
 

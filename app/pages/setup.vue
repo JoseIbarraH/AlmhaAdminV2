@@ -154,7 +154,7 @@ async function onSubmit() {
           </div>
 
           <!-- Form -->
-          <UForm ref="formRef" :state="state" :validate="validate" v-auto-animate class="form-body" @submit="onSubmit">
+          <UForm ref="formRef" :state="state" :validate="validate" v-auto-animate class="form-body" autocomplete="off" @submit="onSubmit">
 
             <!-- Full Name -->
             <UFormField name="name" class="field-wrap">
@@ -164,7 +164,7 @@ async function onSubmit() {
                 </div>
               </template>
               <UInput v-model="state.name" :placeholder="$t('auth.setup.namePlaceholder')" icon="i-heroicons-user" size="xl" variant="subtle"
-                class="w-full" />
+                class="w-full" autocomplete="off" />
               <template #error="{ error }">
                 <span class="error-text">{{ error }}</span>
               </template>
@@ -178,7 +178,7 @@ async function onSubmit() {
                 </div>
               </template>
               <UInput v-model="state.email" :placeholder="$t('auth.setup.emailPlaceholder')" icon="i-heroicons-envelope" size="xl"
-                variant="subtle" class="w-full" />
+                variant="subtle" class="w-full" autocomplete="off" />
               <template #error="{ error }">
                 <span class="error-text">{{ error }}</span>
               </template>
@@ -195,7 +195,7 @@ async function onSubmit() {
                 </template>
                 <UInput v-model="state.password" :type="showPassword ? 'text' : 'password'"
                   icon="i-heroicons-lock-closed" placeholder="••••••••" size="xl" variant="subtle" class="w-full"
-                  :ui="{ trailing: 'pr-1' }">
+                  :ui="{ trailing: 'pr-1' }" autocomplete="new-password">
                   <template #trailing>
                     <UButton color="neutral" variant="ghost" size="sm"
                       :icon="showPassword ? 'i-heroicons-eye-slash' : 'i-heroicons-eye'"
@@ -217,7 +217,7 @@ async function onSubmit() {
                 </template>
                 <UInput v-model="state.password_confirmation" :type="showConfirmPassword ? 'text' : 'password'"
                   icon="i-heroicons-lock-closed" placeholder="••••••••" size="xl" variant="subtle" class="w-full"
-                  :ui="{ trailing: 'pr-1' }">
+                  :ui="{ trailing: 'pr-1' }" autocomplete="new-password">
                   <template #trailing>
                     <UButton color="neutral" variant="ghost" size="sm"
                       :icon="showConfirmPassword ? 'i-heroicons-eye-slash' : 'i-heroicons-eye'"
