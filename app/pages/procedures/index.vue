@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, computed, onMounted, onUnmounted, watchEffect } from 'vue'
+import ProcedureCategoryModal from '~/components/procedures/ProcedureCategoryModal.vue'
 
 definePageMeta({
   middleware: ['auth']
@@ -9,6 +10,7 @@ const page = ref(1)
 const searchQuery = ref('')
 const selectedStatus = ref('')
 const isMenuOpen = ref(false)
+const isCategoryModalOpen = ref(false)
 const debouncedSearch = ref('')
 let debounceTimer: any = null
 
@@ -122,6 +124,10 @@ const getStatusLabel = (status: string) => {
 const handleRefresh = () => {
   refresh()
 }
+
+const handleCategoriesUpdate = () => {
+  refresh()
+}
 </script>
 
 <template>
@@ -139,6 +145,10 @@ const handleRefresh = () => {
       <div class="header-actions">
         <button class="btn-refresh" :disabled="pending" @click="handleRefresh" :title="$t('procedures.header.refresh')">
           <UIcon name="i-heroicons-arrow-path" :class="{ 'animate-spin': pending }" class="icon-md" />
+        </button>
+        <button class="btn-ghost" @click="isCategoryModalOpen = true">
+          <UIcon name="i-heroicons-tag" class="icon-md" />
+          <span>{{ $t('procedures.categories.modalTitle', 'Categorías') }}</span>
         </button>
         <NuxtLink to="/procedures/create" class="btn-primary">
           <UIcon name="i-heroicons-plus" class="icon-md" />
@@ -249,6 +259,9 @@ const handleRefresh = () => {
         </button>
       </div>
     </footer>
+
+    <!-- Modals -->
+    <ProcedureCategoryModal v-model="isCategoryModalOpen" @updated="handleCategoriesUpdate" />
   </div>
 </template>
 
@@ -366,6 +379,38 @@ const handleRefresh = () => {
 
 :root.dark .btn-primary:hover {
   background: #b89235;
+}
+
+.btn-ghost {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: #64748b;
+  padding: 0 1.5rem;
+  height: 44px;
+  border-radius: 12px;
+  font-weight: 600;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+:root.dark .btn-ghost {
+  color: #94a3b8;
+  border-color: #334155;
+}
+
+.btn-ghost:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+  border-color: #cbd5e1;
+}
+
+:root.dark .btn-ghost:hover {
+  background: #1e293b;
+  color: #f8fafc;
+  border-color: #475569;
 }
 
 /* Toolbar */

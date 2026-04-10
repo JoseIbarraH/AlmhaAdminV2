@@ -13,10 +13,19 @@ const emit = defineEmits(['update:modelValue', 'updated'])
 const { t, locale } = useI18n()
 const toast = useToast()
 
-watch(locale, (newLocale) => {
+const currentLang = computed(() => locale.value.split('-')[0] || 'es')
+
+const currentLangLabel = computed(() => {
+  switch (currentLang.value) {
+    case 'en': return 'English (EN)'
+    default: return 'Español (ES)'
+  }
+})
+
+watch(locale, () => {
   if (isOpen.value) {
     fetchCategories()
-    form.value.baseLang = newLocale.split('-')[0] || 'es'
+    form.value.baseLang = currentLang.value
   }
 })
 
@@ -39,7 +48,7 @@ const form = ref({
   id: null as number | null,
   code: '',
   title: '',
-  baseLang: 'es'
+  baseLang: currentLang.value
 })
 
 // Helper to generate random string
@@ -95,7 +104,7 @@ const selectCategory = (category: any) => {
     id: category.id,
     code: category.code,
     title: category.title,
-    baseLang: 'es'
+    baseLang: currentLang.value
   }
 }
 
@@ -105,7 +114,7 @@ const resetForm = () => {
     id: null,
     code: generateRandomCode(),
     title: '',
-    baseLang: 'es'
+    baseLang: currentLang.value
   }
 }
 
@@ -262,9 +271,9 @@ watch(isOpen, (newVal) => {
                       <label class="label-premium">{{ t('procedures.categories.labelSlug') }}</label>
                       <UInput v-model="form.code" disabled variant="none" class="input-premium font-mono text-sm" />
                     </div>
-                    <div class="field-premium">
+                    <div class="field-premium opacity-60">
                       <label class="label-premium">{{ t('procedures.categories.labelLang') }}</label>
-                      <USelect v-model="form.baseLang" size="xl" :options="[{ label: 'Español (ES)', value: 'es' }, { label: 'English (EN)', value: 'en' }]" />
+                      <UInput :model-value="currentLangLabel" disabled size="xl" variant="none" class="input-premium text-sm" />
                     </div>
                   </div>
                 </div>
