@@ -3,6 +3,7 @@
     "dashboard": "Tablero",
     "blog": "Blog",
     "procedures": "Procedimientos",
+    "teams": "Equipo",
     "logout": "Cerrar Sesión",
     "theme": "Cambiar tema",
     "language": "Idioma",
@@ -267,6 +268,80 @@
       "btnClear": "Limpiar Formulario",
       "btnSave": "Guardar Cambios",
       "btnCreate": "Crear Categoría"
+    }
+  },
+  "teams": {
+    "header": {
+      "title": "Gestión del {content}",
+      "content": "Equipo",
+      "description": "Administra los miembros de tu equipo profesional.",
+      "refresh": "Actualizar lista",
+      "newEntry": "Nuevo Miembro"
+    },
+    "toolbar": {
+      "searchPlaceholder": "Buscar miembros...",
+      "filters": {
+        "all": "Todos los estados",
+        "active": "Activos",
+        "inactive": "Inactivos"
+      }
+    },
+    "status": {
+      "active": "Activo",
+      "inactive": "Inactivo"
+    },
+    "card": {
+      "noSpecialty": "Sin especialidad",
+      "noDescription": "Sin descripción disponible.",
+      "actions": {
+        "edit": "Editar miembro",
+        "delete": "Eliminar miembro"
+      }
+    },
+    "empty": {
+      "title": "No hay miembros en el equipo",
+      "description": "Aún no has añadido ningún miembro. Comienza creando el primero.",
+      "action": "Añadir primer miembro"
+    },
+    "pagination": {
+      "info": "Página {current} de {total}",
+      "prev": "Anterior",
+      "next": "Siguiente"
+    },
+    "delete": {
+      "title": "Eliminar Miembro",
+      "description": "¿Estás seguro de que deseas eliminar a {name}? Esta acción no se puede deshacer.",
+      "cancel": "Cancelar",
+      "confirm": "Eliminar"
+    },
+    "form": {
+      "createTitle": "Nuevo Miembro del Equipo",
+      "createDesc": "Añade un nuevo profesional a tu equipo.",
+      "editTitle": "Editar Miembro del Equipo",
+      "editDesc": "Actualiza la información del miembro seleccionado.",
+      "profileImage": "Imagen de Perfil",
+      "clickToUpload": "Clic para subir foto",
+      "name": "Nombre Completo",
+      "namePlaceholder": "Ej: Dr. Juan Pérez",
+      "specialization": "Especialización",
+      "specializationPlaceholder": "Ej: Cirugía Plástica",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Breve descripción profesional...",
+      "biography": "Biografía",
+      "biographyPlaceholder": "Biografía completa del profesional...",
+      "gallery": "Galería de Imágenes",
+      "addImage": "Añadir",
+      "status": "Estado",
+      "statusActive": "Activo (Visible)",
+      "statusInactive": "Inactivo (Oculto)",
+      "language": "Idioma del Contenido",
+      "languageHint": "El contenido se traducirá automáticamente al guardar.",
+      "save": "Guardar Miembro",
+      "update": "Actualizar Miembro",
+      "cancel": "Cancelar",
+      "successCreate": "Miembro creado exitosamente",
+      "successUpdate": "Miembro actualizado exitosamente",
+      "error": "Error al procesar la solicitud"
     }
   },
   "auth": {

@@ -82,7 +82,7 @@ const handleUpdate = async (formData: FormData) => {
        <UButton class="mt-4" @click="router.back()">{{ t('procedures.form.actions.cancel') }}</UButton>
     </div>
 
-    <ProcedureForm v-else :initial-data="procedure.data" :is-edit="true" :loading="updating" @submit="handleUpdate" @cancel="router.back()" @change-language="handleLanguageChange" />
+    <ProcedureForm v-else :initial-data="procedure" :is-edit="true" :loading="updating" @submit="handleUpdate" @cancel="router.back()" @change-language="handleLanguageChange" />
   </div>
 </template>
 

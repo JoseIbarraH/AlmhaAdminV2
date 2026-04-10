@@ -3,6 +3,7 @@
     "dashboard": "Dashboard",
     "blog": "Blog",
     "procedures": "Procedures",
+    "teams": "Team",
     "logout": "Logout",
     "theme": "Change theme",
     "language": "Language",
@@ -267,6 +268,80 @@
       "btnClear": "Clear Form",
       "btnSave": "Save Changes",
       "btnCreate": "Create Category"
+    }
+  },
+  "teams": {
+    "header": {
+      "title": "{content} Management",
+      "content": "Team",
+      "description": "Manage your professional team members.",
+      "refresh": "Refresh list",
+      "newEntry": "New Member"
+    },
+    "toolbar": {
+      "searchPlaceholder": "Search members...",
+      "filters": {
+        "all": "All statuses",
+        "active": "Active",
+        "inactive": "Inactive"
+      }
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "card": {
+      "noSpecialty": "No specialty",
+      "noDescription": "No description available.",
+      "actions": {
+        "edit": "Edit member",
+        "delete": "Delete member"
+      }
+    },
+    "empty": {
+      "title": "No team members",
+      "description": "You haven't added any team members yet. Start by creating the first one.",
+      "action": "Add first member"
+    },
+    "pagination": {
+      "info": "Page {current} of {total}",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "delete": {
+      "title": "Delete Member",
+      "description": "Are you sure you want to delete {name}? This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
+    "form": {
+      "createTitle": "New Team Member",
+      "createDesc": "Add a new professional to your team.",
+      "editTitle": "Edit Team Member",
+      "editDesc": "Update the information of the selected member.",
+      "profileImage": "Profile Image",
+      "clickToUpload": "Click to upload photo",
+      "name": "Full Name",
+      "namePlaceholder": "e.g. Dr. John Smith",
+      "specialization": "Specialization",
+      "specializationPlaceholder": "e.g. Plastic Surgery",
+      "description": "Description",
+      "descriptionPlaceholder": "Brief professional description...",
+      "biography": "Biography",
+      "biographyPlaceholder": "Full professional biography...",
+      "gallery": "Image Gallery",
+      "addImage": "Add",
+      "status": "Status",
+      "statusActive": "Active (Visible)",
+      "statusInactive": "Inactive (Hidden)",
+      "language": "Content Language",
+      "languageHint": "Content will be automatically translated when saved.",
+      "save": "Save Member",
+      "update": "Update Member",
+      "cancel": "Cancel",
+      "successCreate": "Member created successfully",
+      "successUpdate": "Member updated successfully",
+      "error": "Error processing the request"
     }
   },
   "auth": {

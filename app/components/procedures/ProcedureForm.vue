@@ -80,18 +80,19 @@ const tabs = computed(() => [
 ])
 
 // Helper for fixed sections
-const getEmptySection = (type: string): SectionItem => ({
+const getEmptySection = (type: string, order: number = 0): SectionItem => ({
   type,
   title: '',
   contentOne: '',
   contentTwo: '',
+  order,
   image: null,
   imagePreview: null
 })
 
 const initSections = (): SectionItem[] => {
   const types = ['what_is', 'technique', 'recovery']
-  const sections = types.map((type) => getEmptySection(type))
+  const sections = types.map((type, i) => getEmptySection(type, i))
 
   if (props.initialData?.sections) {
     props.initialData.sections.forEach((s: any) => {
@@ -156,7 +157,7 @@ const form = ref({
     
     const pairs: Record<string, any> = {}
     props.initialData.gallery.forEach((g: any) => {
-      const pId = g.pair_id || Date.now() + Math.floor(Math.random() * 1000)
+      const pId = g.pairId || Date.now() + Math.floor(Math.random() * 1000000)
       if (!pairs[pId]) {
         pairs[pId] = {
           id: pId,
@@ -202,6 +203,7 @@ watch(() => props.initialData, (newData) => {
       title: s?.translations?.[0]?.title || '',
       contentOne: s?.translations?.[0]?.content_one || '',
       contentTwo: s?.translations?.[0]?.content_two || '',
+      order: i,
       imagePreview: s?.image || null,
       image: null
     }
@@ -242,7 +244,7 @@ watch(() => props.initialData, (newData) => {
   if (newData.gallery) {
     const pairs: Record<string, any> = {}
     newData.gallery.forEach((g: any) => {
-      const pId = g.pair_id || Date.now() + Math.floor(Math.random() * 1000)
+      const pId = g.pairId || Date.now() + Math.floor(Math.random() * 1000000)
       if (!pairs[pId]) {
         pairs[pId] = {
           id: pId,
@@ -370,6 +372,7 @@ const handleSubmit = () => {
   formData.append('baseLang', form.value.baseLang)
 
   if (form.value.image) formData.append('image', form.value.image)
+  else if (featuredImagePreview.value) formData.append('image', featuredImagePreview.value)
 
   form.value.sections.forEach((s: SectionItem, i: number) => {
     formData.append(`sections[${i}][type]`, s.type)
@@ -377,6 +380,7 @@ const handleSubmit = () => {
     formData.append(`sections[${i}][contentOne]`, s.contentOne)
     formData.append(`sections[${i}][contentTwo]`, s.contentTwo)
     if (s.image) formData.append(`sections[${i}][image]`, s.image)
+    else if (s.imagePreview) formData.append(`sections[${i}][image]`, s.imagePreview)
   })
 
   form.value.faqs.forEach((f: FAQItem, i: number) => {
@@ -415,12 +419,14 @@ const handleSubmit = () => {
     formData.append(`gallery[${i * 2}][order]`, String(i))
     formData.append(`gallery[${i * 2}][pairId]`, String(pair.id))
     if (pair.before.image) formData.append(`gallery[${i * 2}][path]`, pair.before.image)
+    else if (pair.before.preview) formData.append(`gallery[${i * 2}][path]`, pair.before.preview)
 
     // Send after
     formData.append(`gallery[${i * 2 + 1}][type]`, 'after')
     formData.append(`gallery[${i * 2 + 1}][order]`, String(i))
     formData.append(`gallery[${i * 2 + 1}][pairId]`, String(pair.id))
     if (pair.after.image) formData.append(`gallery[${i * 2 + 1}][path]`, pair.after.image)
+    else if (pair.after.preview) formData.append(`gallery[${i * 2 + 1}][path]`, pair.after.preview)
   })
 
   emit('submit', formData)
