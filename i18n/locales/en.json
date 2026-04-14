@@ -4,6 +4,7 @@
     "blog": "Blog",
     "procedures": "Procedures",
     "teams": "Team",
+    "designs": "Design",
     "logout": "Logout",
     "theme": "Change theme",
     "language": "Language",
@@ -342,6 +343,46 @@
       "successCreate": "Member created successfully",
       "successUpdate": "Member updated successfully",
       "error": "Error processing the request"
+    }
+  },
+  "designs": {
+    "header": {
+      "title": "{content} Management",
+      "content": "Design",
+      "description": "Customize images, banners and carousels for your website.",
+      "refresh": "Refresh"
+    },
+    "sections": {
+      "main_banner": "Main Banner (Carousel)",
+      "alternate_main_banner": "Alternate Banner (Single Image)",
+      "background_1": "Background 1",
+      "background_2": "Background 2",
+      "background_3": "Background 3",
+      "brands_carousel": "Brands Carousel"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "labels": {
+      "visibility": "Visibility",
+      "addSlide": "Add Slide",
+      "uploadImage": "Upload image",
+      "uploadMedia": "Upload image or video",
+      "replaceMedia": "Replace",
+      "removeMedia": "Remove",
+      "title": "Title",
+      "subtitle": "Subtitle",
+      "noMedia": "No media file",
+      "saving": "Saving...",
+      "saved": "Saved successfully",
+      "error": "Error processing the request",
+      "deleteSlide": "Delete Slide",
+      "confirmDelete": "Are you sure you want to delete this slide?",
+      "cancel": "Cancel",
+      "confirm": "Delete",
+      "order": "Order",
+      "slideStatus": "Slide status"
     }
   },
   "auth": {

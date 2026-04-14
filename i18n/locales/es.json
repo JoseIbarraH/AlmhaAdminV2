@@ -4,6 +4,7 @@
     "blog": "Blog",
     "procedures": "Procedimientos",
     "teams": "Equipo",
+    "designs": "Diseño",
     "logout": "Cerrar Sesión",
     "theme": "Cambiar tema",
     "language": "Idioma",
@@ -342,6 +343,46 @@
       "successCreate": "Miembro creado exitosamente",
       "successUpdate": "Miembro actualizado exitosamente",
       "error": "Error al procesar la solicitud"
+    }
+  },
+  "designs": {
+    "header": {
+      "title": "Gestión de {content}",
+      "content": "Diseño",
+      "description": "Personaliza las imágenes, banners y carruseles de tu sitio web.",
+      "refresh": "Actualizar"
+    },
+    "sections": {
+      "main_banner": "Banner Principal (Carrusel)",
+      "alternate_main_banner": "Banner Alternativo (Imagen Única)",
+      "background_1": "Fondo 1",
+      "background_2": "Fondo 2",
+      "background_3": "Fondo 3",
+      "brands_carousel": "Carrusel de Marcas"
+    },
+    "status": {
+      "active": "Activo",
+      "inactive": "Inactivo"
+    },
+    "labels": {
+      "visibility": "Visibilidad",
+      "addSlide": "Agregar Slide",
+      "uploadImage": "Subir imagen",
+      "uploadMedia": "Subir imagen o video",
+      "replaceMedia": "Reemplazar",
+      "removeMedia": "Quitar",
+      "title": "Título",
+      "subtitle": "Subtítulo",
+      "noMedia": "Sin archivo multimedia",
+      "saving": "Guardando...",
+      "saved": "Guardado con éxito",
+      "error": "Error al procesar la solicitud",
+      "deleteSlide": "Eliminar Slide",
+      "confirmDelete": "¿Estás seguro de eliminar este slide?",
+      "cancel": "Cancelar",
+      "confirm": "Eliminar",
+      "order": "Orden",
+      "slideStatus": "Estado del slide"
     }
   },
   "auth": {

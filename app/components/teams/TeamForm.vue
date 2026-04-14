@@ -46,6 +46,10 @@ const imageFile = ref<File | null>(null)
 const imagePreview = ref<string | null>(null)
 const galleryFiles = ref<{ file: File | null; preview: string; existingPath?: string; order: number }[]>([])
 
+// Cropper state
+const isCropperModalOpen = ref(false)
+const cropperTargetImage = ref<string | null>(null)
+
 // Status select
 const isStatusMenuOpen = ref(false)
 const statusOptions = computed(() => [
@@ -117,9 +121,21 @@ watch(() => props.initialData, () => {
 const handleImageUpload = (event: Event) => {
   const target = event.target as HTMLInputElement
   if (target.files && target.files[0]) {
-    imageFile.value = target.files[0]
-    imagePreview.value = URL.createObjectURL(target.files[0])
+    cropperTargetImage.value = URL.createObjectURL(target.files[0])
+    isCropperModalOpen.value = true
   }
+  // Reset input
+  target.value = ''
+}
+
+const onCropCompleted = (payload: { file: File, previewUrl: string }) => {
+  imageFile.value = payload.file
+  imagePreview.value = payload.previewUrl
+  cropperTargetImage.value = null
+}
+
+const cancelCropping = () => {
+  cropperTargetImage.value = null
 }
 
 const removeImage = () => {
@@ -345,6 +361,18 @@ defineExpose({ handleSubmit })
         </div>
       </div>
     </div>
+
+    <!-- Reusable Cropper Modal -->
+    <ImageCropperModal
+      v-model="isCropperModalOpen"
+      :src="cropperTargetImage"
+      :aspect-ratio="3/4"
+      title="Recortar Imagen"
+      cancel-text="Cancelar"
+      save-text="Guardar Recorte"
+      @crop="onCropCompleted"
+      @cancel="cancelCropping"
+    />
   </div>
 </template>
 
@@ -415,8 +443,8 @@ defineExpose({ handleSubmit })
 
 .avatar-preview-wrap {
   width: 160px;
-  height: 160px;
-  border-radius: 50%;
+  height: 213px;
+  border-radius: 14px;
   border: 3px dashed #e2e8f0;
   overflow: hidden;
   cursor: pointer;
@@ -462,8 +490,8 @@ defineExpose({ handleSubmit })
 
 .btn-remove-avatar {
   position: absolute;
-  top: 0;
-  right: calc(50% - 80px);
+  top: -10px;
+  right: calc(50% - 90px);
   width: 28px;
   height: 28px;
   border-radius: 50%;

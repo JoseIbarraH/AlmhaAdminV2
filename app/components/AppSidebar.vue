@@ -3,6 +3,7 @@ const { t } = useI18n()
 
 const navigationItems = computed(() => [
   { label: t('nav.dashboard'), icon: 'i-heroicons-home', to: '/dashboard' },
+  { label: t('nav.designs'), icon: 'i-heroicons-paint-brush', to: '/designs' },
   { label: t('nav.blog'), icon: 'i-heroicons-document-text', to: '/blogs' },
   { label: t('nav.procedures'), icon: 'i-heroicons-sparkles', to: '/procedures' },
   { label: t('nav.teams'), icon: 'i-heroicons-user-group', to: '/teams' },
