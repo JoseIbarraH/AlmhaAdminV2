@@ -8,7 +8,7 @@ definePageMeta({
 })
 
 const toast = useToast()
-const { t } = useI18n()
+const { t } = useI18n({ useScope: 'global' })
 const colorMode = useColorMode()
 const config = useRuntimeConfig()
 
@@ -64,6 +64,12 @@ async function onSubmit() {
       color: 'success',
       icon: 'i-heroicons-check-circle'
     })
+
+    // Clear any residual auth state so the guest middleware doesn't redirect to dashboard
+    const token = useCookie('auth_token')
+    token.value = null
+    const user = useState('user')
+    user.value = null
 
     navigateTo('/login')
   } catch (error: any) {

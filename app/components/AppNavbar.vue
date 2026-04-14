@@ -5,7 +5,7 @@ import logoLightImg from '../assets/images/logo2.png'
 const config = useRuntimeConfig()
 const colorMode = useColorMode()
 const { logout, user } = useAlmhaAuth()
-const { locale, setLocale, t } = useI18n()
+const { locale, setLocale, t } = useI18n({ useScope: 'global' })
 
 const currentLogo = computed(() => {
   return colorMode.value === 'dark' ? logoDarkImg : logoLightImg
@@ -30,6 +30,25 @@ const languageItems = computed(() => [
       trailingIcon: locale.value === 'en' ? 'i-heroicons-check' : undefined,
       onSelect: () => setLocale('en'),
       active: locale.value === 'en'
+    }
+  ]
+])
+
+const isSuperAdmin = computed(() => user.value?.roles?.includes('super_admin'))
+
+const userMenuItems = computed(() => [
+  [
+    {
+      label: t('nav.profile'),
+      icon: 'i-heroicons-user',
+      to: '/profile'
+    }
+  ],
+  [
+    {
+      label: t('nav.logout'),
+      icon: 'i-heroicons-arrow-right-on-rectangle',
+      onSelect: logout
     }
   ]
 ])
@@ -72,16 +91,23 @@ const languageItems = computed(() => [
         </ClientOnly>
       </button>
 
-      <!-- Profile / User Menu -->
-      <div class="user-control">
-        <div class="user-info text-right hidden sm:block">
-          <p class="user-name">{{ user?.name || t('nav.admin') }}</p>
-          <p class="user-role">{{ t('nav.super_admin') }}</p>
-        </div>
-        <UButton icon="i-heroicons-arrow-right-on-rectangle" variant="ghost" color="neutral" class="logout-btn"
-          :aria-label="t('nav.logout')"
-          @click="logout" />
-      </div>
+      <!-- User Dropdown Menu -->
+      <UDropdownMenu :items="userMenuItems" :content="{ align: 'end' }" :ui="{ content: 'w-48' }">
+        <button class="user-trigger">
+          <div class="user-avatar-placeholder">
+            <UIcon name="i-heroicons-user" class="icon-md" />
+          </div>
+          <div class="user-details text-left hidden @sm:block">
+            <p class="user-name">
+              {{ user?.name || t('nav.admin') }}
+              <UBadge v-if="isSuperAdmin" color="primary" variant="subtle" size="sm" class="ml-1 admin-badge">
+                Admin
+              </UBadge>
+            </p>
+          </div>
+          <UIcon name="i-heroicons-chevron-down" class="icon-xs opacity-50" />
+        </button>
+      </UDropdownMenu>
     </div>
   </header>
 </template>
@@ -228,30 +254,63 @@ const languageItems = computed(() => [
   letter-spacing: 0.025em;
 }
 
-.user-control {
+.user-trigger {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding-left: 1.5rem;
-  border-left: 1px solid #e2e8f0;
+  gap: 10px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-:root.dark .user-control {
-  border-color: #1e293b;
+.user-trigger:hover {
+  background: #f1f5f9;
+}
+
+:root.dark .user-trigger:hover {
+  background: #1e293b;
+}
+
+.user-avatar-placeholder {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+:root.dark .user-avatar-placeholder {
+  background: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
 }
 
 .user-name {
   font-size: 0.875rem;
   font-weight: 600;
   color: #1e293b;
+  display: flex;
+  align-items: center;
 }
 
 :root.dark .user-name {
   color: #f8fafc;
 }
 
-.user-role {
-  font-size: 0.75rem;
-  color: #64748b;
+.admin-badge {
+  font-size: 0.65rem;
+  padding: 0 4px;
+}
+
+.icon-md {
+  width: 20px;
+  height: 20px;
 }
 </style>

@@ -14,7 +14,7 @@ import { TableCell } from '@tiptap/extension-table-cell'
 import { TextStyle } from '@tiptap/extension-text-style'
 import { Color } from '@tiptap/extension-color'
 
-const { locale } = useI18n()
+const { locale } = useI18n({ useScope: 'global' })
 
 const props = defineProps({
   modelValue: {

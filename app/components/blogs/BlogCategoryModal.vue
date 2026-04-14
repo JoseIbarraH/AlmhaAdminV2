@@ -10,7 +10,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'updated'])
 
-const { t, locale } = useI18n()
+const { t, locale } = useI18n({ useScope: 'global' })
 const toast = useToast()
 
 const currentLang = computed(() => locale.value.split('-')[0] || 'es')

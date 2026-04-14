@@ -11,18 +11,15 @@ export const useApi = async <T = any>(path: string, options: any = {}): Promise<
 
   let currentLocale = 'es';
   try {
-    const i18n = useI18n();
+    const nuxtApp = useNuxtApp();
+    const i18n = nuxtApp.$i18n as any;
     if (i18n?.locale?.value) {
       currentLocale = i18n.locale.value.split('-')[0] || 'es';
+    } else if (i18n?.locale) {
+      currentLocale = (typeof i18n.locale === 'string' ? i18n.locale : i18n.locale.value || 'es').split('-')[0];
     }
   } catch (e) {
-    // Fallback for SSR/Middleware contexts where useI18n might fail
-    try {
-      const i18n = (globalThis as any).$i18n || (globalThis as any).$nuxt?.$i18n;
-      if (i18n?.locale?.value) {
-        currentLocale = i18n.locale.value.split('-')[0] || 'es';
-      }
-    } catch (innerE) {}
+    // Silent fallback
   }
 
   // Helper to construct request headers

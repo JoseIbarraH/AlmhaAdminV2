@@ -33,7 +33,7 @@ const emit = defineEmits<{
   (e: 'cancel'): void
 }>()
 
-const { t, locale } = useI18n()
+const { t, locale } = useI18n({ useScope: 'global' })
 
 // Form fields
 const name = ref('')

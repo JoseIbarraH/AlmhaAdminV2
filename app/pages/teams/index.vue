@@ -61,7 +61,7 @@ interface ApiResponse {
   }
 }
 
-const { locale, t } = useI18n()
+const { locale, t } = useI18n({ useScope: 'global' })
 
 const statusOptions = computed(() => [
   { label: t('teams.toolbar.filters.all'), value: '' },

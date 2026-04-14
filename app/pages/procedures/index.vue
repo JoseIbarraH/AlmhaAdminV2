@@ -51,7 +51,7 @@ interface ApiResponse {
 }
 
 // Fetch de datos reactivo
-const { locale } = useI18n()
+const { locale } = useI18n({ useScope: 'global' })
 const { data: response, pending, refresh, error } = await useAsyncData<ApiResponse>(
   'procedures',
   () => useApi<ApiResponse>('/procedures', {
@@ -71,9 +71,9 @@ const procedures = computed(() => response.value?.data || [])
 const meta = computed(() => response.value?.meta || null)
 
 const statusOptions = computed(() => [
-  { label: useI18n().t('procedures.toolbar.filters.all'), value: '' },
-  { label: useI18n().t('procedures.toolbar.filters.published'), value: 'published' },
-  { label: useI18n().t('procedures.toolbar.filters.drafts'), value: 'draft' }
+  { label: useI18n({ useScope: 'global' }).t('procedures.toolbar.filters.all'), value: '' },
+  { label: useI18n({ useScope: 'global' }).t('procedures.toolbar.filters.published'), value: 'published' },
+  { label: useI18n({ useScope: 'global' }).t('procedures.toolbar.filters.drafts'), value: 'draft' }
 ])
 
 const currentStatusLabel = computed(() => {
@@ -115,8 +115,8 @@ const getStatusClass = (status: string) => {
 
 const getStatusLabel = (status: string) => {
   switch (status) {
-    case 'published': return useI18n().t('procedures.status.published')
-    case 'draft': return useI18n().t('procedures.status.draft')
+    case 'published': return useI18n({ useScope: 'global' }).t('procedures.status.published')
+    case 'draft': return useI18n({ useScope: 'global' }).t('procedures.status.draft')
     default: return status
   }
 }

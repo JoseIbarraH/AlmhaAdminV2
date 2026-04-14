@@ -291,7 +291,7 @@ const fetchCategories = async () => {
   }
 }
 
-const { t, locale } = useI18n()
+const { t, locale } = useI18n({ useScope: 'global' })
 
 watch(() => form.value.baseLang, () => {
   fetchCategories()

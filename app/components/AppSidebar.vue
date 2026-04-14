@@ -1,5 +1,8 @@
 <script setup lang="ts">
-const { t } = useI18n()
+const { t } = useI18n({ useScope: 'global' })
+const { user } = useAlmhaAuth()
+
+const isSuperAdmin = computed(() => user.value?.roles?.includes('super_admin'))
 
 const navigationItems = computed(() => [
   { label: t('nav.dashboard'), icon: 'i-heroicons-home', to: '/dashboard' },
@@ -7,6 +10,7 @@ const navigationItems = computed(() => [
   { label: t('nav.blog'), icon: 'i-heroicons-document-text', to: '/blogs' },
   { label: t('nav.procedures'), icon: 'i-heroicons-sparkles', to: '/procedures' },
   { label: t('nav.teams'), icon: 'i-heroicons-user-group', to: '/teams' },
+  ...(isSuperAdmin.value ? [{ label: t('nav.trash'), icon: 'i-heroicons-trash', to: '/trash' }] : []),
 ])
 </script>
 

@@ -9,7 +9,7 @@ definePageMeta({
 })
 
 const { login } = useAlmhaAuth()
-const { t } = useI18n()
+const { t } = useI18n({ useScope: 'global' })
 const toast = useToast()
 const colorMode = useColorMode()
 const config = useRuntimeConfig()

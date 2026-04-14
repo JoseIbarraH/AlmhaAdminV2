@@ -5,7 +5,7 @@ definePageMeta({
   middleware: ['auth']
 })
 
-const { t, locale } = useI18n()
+const { t, locale } = useI18n({ useScope: 'global' })
 
 interface DesignTranslation {
   id: number
@@ -97,11 +97,12 @@ const uploadingItemId = ref<number | null>(null)
 
 const handleMediaUpload = async (event: Event, item: DesignItem) => {
   const target = event.target as HTMLInputElement
-  if (!target.files?.length) return
+  const file = target.files?.[0]
+  if (!file) return
 
   uploadingItemId.value = item.id
   const formData = new FormData()
-  formData.append('media_file', target.files[0])
+  formData.append('media_file', file)
 
   try {
     await useApi(`/designs/items/${item.id}`, {
@@ -129,6 +130,7 @@ const updateItemField = (item: DesignItem, field: 'title' | 'subtitle', value: s
   
   if (transIndex > -1) {
     const existing = translations[transIndex]
+    if (!existing) return
     translations[transIndex] = {
       id: existing.id,
       lang: existing.lang,

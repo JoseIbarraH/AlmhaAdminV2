@@ -7,11 +7,11 @@ definePageMeta({
 
 const route = useRoute()
 const router = useRouter()
-const { t } = useI18n()
+const { t } = useI18n({ useScope: 'global' })
 const toast = useToast()
 
 const id = route.params.id as string
-const { locale } = useI18n()
+const { locale } = useI18n({ useScope: 'global' })
 const editingLocale = ref<string>(locale.value)
 
 const { data: procedure, pending, error } = await useAsyncData(

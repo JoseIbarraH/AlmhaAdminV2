@@ -67,7 +67,7 @@ export const useAlmhaAuth = () => {
           Authorization: `Bearer ${activeToken}`
         }
       }) as any;
-      user.value = response;
+      user.value = response.data || response;
     } catch (error) {
       logout();
     }

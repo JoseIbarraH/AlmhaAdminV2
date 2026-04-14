@@ -29,9 +29,9 @@ watch(selectedStatus, () => {
 })
 
 const statusOptions = computed(() => [
-  { label: useI18n().t('blogs.toolbar.filters.all'), value: '' },
-  { label: useI18n().t('blogs.toolbar.filters.published'), value: 'published' },
-  { label: useI18n().t('blogs.toolbar.filters.drafts'), value: 'draft' }
+  { label: useI18n({ useScope: 'global' }).t('blogs.toolbar.filters.all'), value: '' },
+  { label: useI18n({ useScope: 'global' }).t('blogs.toolbar.filters.published'), value: 'published' },
+  { label: useI18n({ useScope: 'global' }).t('blogs.toolbar.filters.drafts'), value: 'draft' }
 ])
 
 const currentStatusLabel = computed(() => {
@@ -89,7 +89,7 @@ interface ApiResponse {
 }
 
 // Fetch de datos reactivo con tipado
-const { locale } = useI18n()
+const { locale } = useI18n({ useScope: 'global' })
 const { data: response, pending, refresh, error } = await useAsyncData<ApiResponse>(
   'blogs',
   () => useApi<ApiResponse>('/blogs', {
@@ -130,14 +130,14 @@ const getStatusClass = (status: string) => {
 
 const getStatusLabel = (status: string) => {
   switch (status) {
-    case 'published': return useI18n().t('blogs.status.published')
-    case 'draft': return useI18n().t('blogs.status.draft')
+    case 'published': return useI18n({ useScope: 'global' }).t('blogs.status.published')
+    case 'draft': return useI18n({ useScope: 'global' }).t('blogs.status.draft')
     default: return status
   }
 }
 
 const formatDate = (dateString: string | null) => {
-  const { t, locale } = useI18n()
+  const { t, locale } = useI18n({ useScope: 'global' })
   if (!dateString) return t('blogs.date.empty')
   return new Date(dateString).toLocaleDateString(t('blogs.date.format'), {
     year: 'numeric',

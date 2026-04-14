@@ -6,7 +6,7 @@
  */
 
 const colorMode = useColorMode()
-const { locale, setLocale, t } = useI18n()
+const { locale, setLocale, t } = useI18n({ useScope: 'global' })
 
 function toggleTheme() {
   colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'

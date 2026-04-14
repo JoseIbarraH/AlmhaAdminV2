@@ -19,7 +19,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['submit', 'cancel', 'change-language'])
-const { t, locales } = useI18n()
+const { t, locales } = useI18n({ useScope: 'global' })
 
 const form = ref({
   title: props.initialData.translations?.[0]?.title || '',
@@ -83,7 +83,7 @@ const fetchCategories = async () => {
   }
 }
 
-const { locale } = useI18n()
+const { locale } = useI18n({ useScope: 'global' })
 watch(() => form.value.baseLang, () => {
   fetchCategories()
 })

@@ -11,7 +11,9 @@
     "spanish": "Español",
     "english": "Inglés",
     "admin": "Administrador",
-    "super_admin": "Super Admin"
+    "super_admin": "Super Admin",
+    "profile": "Mi Perfil",
+    "trash": "Papelera"
   },
   "blogs": {
     "header": {
@@ -454,6 +456,52 @@
         "title": "Fallo en la inicialización",
         "description": "Verifica los datos (la contraseña debe tener al menos 8 caracteres)."
       }
+    }
+  },
+  "profile": {
+    "title": "Mi Perfil",
+    "description": "Gestiona tu información personal y seguridad de la cuenta.",
+    "personal_info": "Información Personal",
+    "security": "Seguridad",
+    "danger_zone": "Zona de Peligro",
+    "name": "Nombre completo",
+    "email": "Correo electrónico",
+    "current_password": "Contraseña actual",
+    "new_password": "Nueva contraseña",
+    "confirm_password": "Confirmar contraseña",
+    "save_changes": "Guardar cambios",
+    "delete_account": "Eliminar cuenta",
+    "confirm_delete_title": "Confirmar eliminación de cuenta",
+    "confirm_delete_btn": "Sí, eliminar cuenta",
+    "delete_warning": "Esta acción es irreversible. Tu cuenta será desactivada y movida a la papelera.",
+    "main_admin_delete_restricted": "Esta cuenta es la principal del sistema y no puede ser eliminada.",
+    "success_update": "Perfil actualizado correctamente.",
+    "error_update": "Error al actualizar el perfil.",
+    "personal_info_desc": "Actualiza tu nombre de usuario y mantén tu información de cuenta al día. Tu correo electrónico es el identificador único de tu cuenta.",
+    "security_desc": "Te recomendamos utilizar una contraseña de al menos 8 caracteres que incluya letras, números y símbolos.",
+    "danger_zone_desc": "Estas acciones son permanentes. Asegúrate de estar completamente seguro antes de proceder con la desactivación de tu cuenta.",
+    "critical_procedure": "Procedimiento crítico",
+    "delete_permanent_warning": "Tu cuenta será desactivada y sus datos serán conservados temporalmente en la papelera administrativa para una posible recuperación futura por parte de un Super Admin."
+  },
+  "trash": {
+    "title": "Papelera de Reciclaje",
+    "description": "Administra los elementos eliminados. Puedes restaurarlos o eliminarlos permanentemente.",
+    "empty": "La papelera está vacía.",
+    "name": "Nombre / Título",
+    "type": "Tipo",
+    "deleted_at": "Eliminado el",
+    "actions": "Acciones",
+    "restore": "Restaurar",
+    "permanent_delete": "Eliminar permanentemente",
+    "confirm_permanent": "¿Estás seguro de eliminar este elemento para siempre? Esta acción no se puede deshacer.",
+    "success_restore": "Elemento restaurado con éxito.",
+    "success_permanent": "Elemento eliminado permanentemente.",
+    "types": {
+      "user": "Usuario",
+      "blog": "Entrada de Blog",
+      "procedure": "Procedimiento",
+      "team": "Miembro del Equipo",
+      "design": "Diseño"
     }
   }
 }

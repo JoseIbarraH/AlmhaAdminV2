@@ -18,7 +18,10 @@ export default defineNuxtConfig({
       { code: 'es', name: 'Español', file: 'es.json' }
     ],
     defaultLocale: 'es',
-    strategy: 'no_prefix'
+    strategy: 'no_prefix',
+    bundle: {
+      compositionOnly: true
+    }
   },
 
   runtimeConfig: {
