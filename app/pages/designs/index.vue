@@ -244,7 +244,7 @@ const getModeIcon = (mode: string) => {
     <!-- Header -->
     <header class="designs-header">
       <div class="header-info">
-        <i18n-t keypath="designs.header.title" tag="h1" class="header-title">
+        <i18n-t keypath="designs.header.title" tag="h1" class="header-title" scope="global">
           <template #content>
             <span class="gold">{{ $t('designs.header.content') }}</span>
           </template>

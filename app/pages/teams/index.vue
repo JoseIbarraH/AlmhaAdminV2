@@ -189,7 +189,7 @@ const executeDelete = async () => {
     <!-- Header -->
     <header class="teams-header">
       <div class="header-info">
-        <i18n-t keypath="teams.header.title" tag="h1" class="header-title">
+        <i18n-t keypath="teams.header.title" tag="h1" class="header-title" scope="global">
           <template #content>
             <span class="gold">{{ $t('teams.header.content') }}</span>
           </template>
@@ -300,7 +300,7 @@ const executeDelete = async () => {
     <!-- Footer / Pagination -->
     <footer v-if="meta && meta.last_page > 1" class="teams-footer">
       <div class="page-info">
-        <i18n-t keypath="teams.pagination.info" tag="span">
+        <i18n-t keypath="teams.pagination.info" tag="span" scope="global">
           <template #current>
             <strong>{{ meta.current_page }}</strong>
           </template>

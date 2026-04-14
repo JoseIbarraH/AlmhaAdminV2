@@ -164,7 +164,7 @@ const handleCategoriesUpdate = () => {
     <!-- Header -->
     <header class="blogs-header">
       <div class="header-info">
-        <i18n-t keypath="blogs.header.title" tag="h1" class="header-title">
+        <i18n-t keypath="blogs.header.title" tag="h1" class="header-title" scope="global">
           <template #content>
             <span class="gold">{{ $t('blogs.header.content') }}</span>
           </template>
@@ -271,7 +271,7 @@ const handleCategoriesUpdate = () => {
     <!-- Footer -->
     <footer v-if="meta && meta.last_page > 1" class="blogs-footer">
       <div class="page-info">
-        <i18n-t keypath="blogs.pagination.info" tag="span">
+        <i18n-t keypath="blogs.pagination.info" tag="span" scope="global">
           <template #current>
             <strong>{{ meta.current_page }}</strong>
           </template>

@@ -160,7 +160,8 @@ async function onSubmit() {
           </div>
 
           <!-- Form -->
-          <UForm ref="formRef" :state="state" :validate="validate" v-auto-animate class="form-body" autocomplete="off" @submit="onSubmit">
+          <UForm ref="formRef" :state="state" :validate="validate" v-auto-animate class="form-body" autocomplete="off"
+            @submit="onSubmit">
 
             <!-- Full Name -->
             <UFormField name="name" class="field-wrap">
@@ -169,8 +170,8 @@ async function onSubmit() {
                   <span class="field-label">{{ $t('auth.setup.nameLabel') }}</span>
                 </div>
               </template>
-              <UInput v-model="state.name" :placeholder="$t('auth.setup.namePlaceholder')" icon="i-heroicons-user" size="xl" variant="subtle"
-                class="w-full" autocomplete="off" />
+              <UInput v-model="state.name" :placeholder="$t('auth.setup.namePlaceholder')" icon="i-heroicons-user"
+                size="xl" variant="subtle" class="w-full" autocomplete="off" />
               <template #error="{ error }">
                 <span class="error-text">{{ error }}</span>
               </template>
@@ -183,8 +184,8 @@ async function onSubmit() {
                   <span class="field-label">{{ $t('auth.setup.emailLabel') }}</span>
                 </div>
               </template>
-              <UInput v-model="state.email" :placeholder="$t('auth.setup.emailPlaceholder')" icon="i-heroicons-envelope" size="xl"
-                variant="subtle" class="w-full" autocomplete="off" />
+              <UInput v-model="state.email" :placeholder="$t('auth.setup.emailPlaceholder')" icon="i-heroicons-envelope"
+                size="xl" variant="subtle" class="w-full" autocomplete="off" />
               <template #error="{ error }">
                 <span class="error-text">{{ error }}</span>
               </template>
