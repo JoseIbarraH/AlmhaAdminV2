@@ -14,6 +14,7 @@
     "super_admin": "Super Admin",
     "profile": "Perfil",
     "users": "Usuarios",
+    "audits": "Auditoría",
     "trash": "Papelera"
   },
   "users": {
@@ -532,6 +533,37 @@
     "danger_zone_desc": "Estas acciones son permanentes. Asegúrate de estar completamente seguro antes de proceder con la desactivación de tu cuenta.",
     "critical_procedure": "Procedimiento crítico",
     "delete_permanent_warning": "Tu cuenta será desactivada y sus datos serán conservados temporalmente en la papelera administrativa para una posible recuperación futura por parte de un Super Admin."
+  },
+  "audits": {
+    "title": "Registro de Auditoría",
+    "description": "Historial completo de todas las acciones realizadas en el sistema.",
+    "empty": "No hay registros de auditoría.",
+    "search": "Buscar por URL o acción...",
+    "table": {
+      "user": "ID Usuario",
+      "user_name": "Nombre",
+      "action": "Acción",
+      "method": "Método",
+      "url": "Ruta",
+      "status": "Estado",
+      "ip": "Dirección IP",
+      "date": "Fecha",
+      "details": "Detalles"
+    },
+    "detail": {
+      "title": "Detalle del Registro",
+      "user_agent": "Navegador",
+      "payload": "Datos Enviados",
+      "no_payload": "Sin datos de payload.",
+      "close": "Cerrar"
+    },
+    "methods": {
+      "GET": "Lectura",
+      "POST": "Creación",
+      "PUT": "Actualización",
+      "PATCH": "Parche",
+      "DELETE": "Eliminación"
+    }
   },
   "trash": {
     "title": "Papelera de Reciclaje",

@@ -14,6 +14,7 @@
     "super_admin": "Super Admin",
     "profile": "Profile",
     "users": "Users",
+    "audits": "Audit Log",
     "trash": "Trash"
   },
   "users": {
@@ -529,6 +530,37 @@
     "danger_zone_desc": "These actions are permanent. Make sure you are completely certain before proceeding with your account deactivation.",
     "critical_procedure": "Critical procedure",
     "delete_permanent_warning": "Your account will be deactivated and its data will be temporarily kept in the administrative trash for a possible future recovery by a Super Admin."
+  },
+  "audits": {
+    "title": "Audit Log",
+    "description": "Complete history of all actions performed in the system.",
+    "empty": "No audit records found.",
+    "search": "Search by URL or action...",
+    "table": {
+      "user": "User ID",
+      "user_name": "Name",
+      "action": "Action",
+      "method": "Method",
+      "url": "Path",
+      "status": "Status",
+      "ip": "IP Address",
+      "date": "Date",
+      "details": "Details"
+    },
+    "detail": {
+      "title": "Record Detail",
+      "user_agent": "Browser",
+      "payload": "Sent Data",
+      "no_payload": "No payload data.",
+      "close": "Close"
+    },
+    "methods": {
+      "GET": "Read",
+      "POST": "Create",
+      "PUT": "Update",
+      "PATCH": "Patch",
+      "DELETE": "Delete"
+    }
   },
   "trash": {
     "title": "Recycle Bin",

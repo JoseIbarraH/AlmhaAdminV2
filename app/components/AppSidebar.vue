@@ -25,6 +25,7 @@ const navigationItems = computed(() => {
 
   if (isSuperAdmin.value) {
     items.push({ label: t('nav.users'), icon: 'i-heroicons-users', to: '/users' })
+    items.push({ label: t('nav.audits'), icon: 'i-heroicons-clipboard-document-list', to: '/audits' })
     items.push({ label: t('nav.trash'), icon: 'i-heroicons-trash', to: '/trash' })
   }
 
