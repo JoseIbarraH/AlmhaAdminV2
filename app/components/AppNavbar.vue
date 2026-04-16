@@ -40,9 +40,9 @@ const isSuperAdmin = computed(() => user.value?.roles?.includes('super_admin'))
 const userMenuItems = computed(() => [
   [
     {
-      label: t('nav.settings'),
-      icon: 'i-heroicons-cog-8-tooth',
-      to: '/settings'
+      label: t('nav.profile'),
+      icon: 'i-heroicons-user-circle',
+      to: '/profile'
     }
   ],
   [

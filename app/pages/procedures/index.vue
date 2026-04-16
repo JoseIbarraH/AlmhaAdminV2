@@ -3,7 +3,8 @@ import { ref, watch, computed, onMounted, onUnmounted, watchEffect } from 'vue'
 import ProcedureCategoryModal from '~/components/procedures/ProcedureCategoryModal.vue'
 
 definePageMeta({
-  middleware: ['auth']
+  middleware: ['auth', 'acl'],
+  roles: ['procedure_manager']
 })
 
 const page = ref(1)

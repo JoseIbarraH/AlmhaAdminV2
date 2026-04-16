@@ -1,15 +1,14 @@
 <script setup lang="ts">
+definePageMeta({
+  middleware: ['auth', 'acl'],
+  roles: ['super_admin']
+})
 const { locale, t } = useI18n({ useScope: 'global' })
 const router = useRouter()
 const { user } = useAlmhaAuth()
 const toast = useToast()
 
-// Restrict access
-onMounted(() => {
-  if (!user.value?.roles?.includes('super_admin')) {
-    router.push('/dashboard')
-  }
-})
+
 
 // State for Trash API
 const page = ref(1)

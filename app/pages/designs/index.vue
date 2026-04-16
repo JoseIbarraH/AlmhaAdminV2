@@ -2,7 +2,8 @@
 import { ref, computed } from 'vue'
 
 definePageMeta({
-  middleware: ['auth']
+  middleware: ['auth', 'acl'],
+  roles: ['design_manager']
 })
 
 const { t, locale } = useI18n({ useScope: 'global' })

@@ -2,20 +2,14 @@
 import { ref, watch, computed, onMounted } from 'vue'
 
 definePageMeta({
-  middleware: ['auth']
+  middleware: ['auth', 'acl'],
+  roles: ['super_admin']
 })
 
 const { locale, t } = useI18n({ useScope: 'global' })
 const router = useRouter()
 const { user } = useAlmhaAuth()
 const toast = useToast()
-
-// Restrict access to Super Admin
-onMounted(() => {
-  if (!user.value?.roles?.includes('super_admin')) {
-    router.push('/dashboard')
-  }
-})
 
 const page = ref(1)
 const searchQuery = ref('')
@@ -61,12 +55,6 @@ const { data: response, pending, refresh } = await useAsyncData<any>(
 
 const users = computed<UserRecord[]>(() => response.value?.data || response.value?.original?.data || [])
 const meta = computed(() => response.value?.meta || response.value?.original?.meta || null)
-
-watchEffect(() => {
-  console.log('USERS DEBUG - Response:', response.value)
-  console.log('USERS DEBUG - Users Array:', users.value)
-  console.log('USERS DEBUG - Auth User:', user.value)
-})
 
 // Columns configuration for UTable
 const columns = computed(() => [
@@ -272,8 +260,9 @@ const executeDelete = async () => {
               :title="user?.id === (row.original as any).id ? 'Usa la página de Ajustes para tu perfil' : 'Editar usuario'" />
             <UButton icon="i-heroicons-trash" size="sm" color="error" variant="ghost"
               class="rounded-lg hover:bg-red-50 dark:hover:bg-red-900/10 text-red-500"
-              @click="confirmDelete((row.original as any).id)" :disabled="user?.id === (row.original as any).id"
-              title="No puedes eliminarte a ti mismo" />
+              @click="confirmDelete((row.original as any).id)" 
+              :disabled="user?.id === (row.original as any).id || (row.original as any).is_main_admin"
+              :title="user?.id === (row.original as any).id ? 'No puedes eliminarte a ti mismo' : ((row.original as any).is_main_admin ? 'El administrador principal no puede ser eliminado' : 'Eliminar usuario')" />
           </div>
         </template>
 
@@ -325,8 +314,15 @@ const executeDelete = async () => {
             </UFormField>
 
             <UFormField :label="t('users.form.roles')" class="w-full">
-              <USelectMenu v-model="formState.roles" :items="(availableRoles as any)" multiple class="w-full text-left"
-                size="lg" value-attribute="value" label-attribute="label" />
+              <USelectMenu 
+                v-model="formState.roles" 
+                :items="availableRoles" 
+                multiple 
+                class="w-full text-left" 
+                size="lg"
+                value-key="value"
+                label-key="label"
+              />
             </UFormField>
 
             <UFormField class="w-full">

@@ -33,7 +33,7 @@ onMounted(() => {
 async function handleUpdate() {
   isUpdating.value = true
   try {
-    await $fetch('/api/v1/profile/update', {
+    await useApi('/profile/update', {
       method: 'POST',
       body: {
         name: state.name,
@@ -61,7 +61,7 @@ async function handleUpdate() {
 async function handleDelete() {
   isDeleting.value = true
   try {
-    await $fetch('/api/v1/profile', {
+    await useApi('/profile', {
       method: 'DELETE'
     })
     logout()

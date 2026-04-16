@@ -3,7 +3,8 @@ import { ref, watch, computed, onMounted, watchEffect } from 'vue'
 import BlogCategoryModal from '~/components/blogs/BlogCategoryModal.vue'
 
 definePageMeta({
-  middleware: ['auth']
+  middleware: ['auth', 'acl'],
+  roles: ['blog_manager']
 })
 
 const page = ref(1)

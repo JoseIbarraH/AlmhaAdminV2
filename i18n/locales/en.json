@@ -12,7 +12,7 @@
     "english": "English",
     "admin": "Administrator",
     "super_admin": "Super Admin",
-    "settings": "Settings",
+    "profile": "Profile",
     "users": "Users",
     "trash": "Trash"
   },
@@ -40,6 +40,7 @@
       "blog_manager": "Blog Manager",
       "procedure_manager": "Procedure Manager",
       "team_manager": "Team Manager",
+      "design_manager": "Design Manager",
       "audit_viewer": "Audit Viewer"
     },
     "form": {

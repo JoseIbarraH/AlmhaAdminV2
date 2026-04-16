@@ -2,7 +2,8 @@
 import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
 
 definePageMeta({
-  middleware: ['auth']
+  middleware: ['auth', 'acl'],
+  roles: ['team_manager']
 })
 
 const page = ref(1)

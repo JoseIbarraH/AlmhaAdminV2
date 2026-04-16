@@ -12,7 +12,7 @@
     "english": "Inglés",
     "admin": "Administrador",
     "super_admin": "Super Admin",
-    "settings": "Ajustes",
+    "profile": "Perfil",
     "users": "Usuarios",
     "trash": "Papelera"
   },
@@ -40,6 +40,7 @@
       "blog_manager": "Gestor de Blog",
       "procedure_manager": "Gestor de Procedimientos",
       "team_manager": "Gestor de Equipo",
+      "design_manager": "Gestor de Diseño",
       "audit_viewer": "Auditor"
     },
     "form": {

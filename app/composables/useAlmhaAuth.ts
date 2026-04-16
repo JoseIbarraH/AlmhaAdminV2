@@ -74,11 +74,25 @@ export const useAlmhaAuth = () => {
   };
 
 
+  const isSuperAdmin = computed(() => user.value?.roles?.includes('super_admin') || false)
+
+  const hasRole = (roleOrRoles: string | string[]) => {
+    if (isSuperAdmin.value) return true
+    if (!user.value?.roles) return false
+    
+    if (Array.isArray(roleOrRoles)) {
+      return roleOrRoles.some(r => user.value?.roles?.includes(r))
+    }
+    return user.value.roles.includes(roleOrRoles)
+  }
+
   return {
     token,
     user,
     login,
     logout,
     fetchUser,
+    isSuperAdmin,
+    hasRole
   };
 };

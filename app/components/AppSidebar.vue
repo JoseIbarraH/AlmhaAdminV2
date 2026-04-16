@@ -1,20 +1,35 @@
 <script setup lang="ts">
 const { t } = useI18n({ useScope: 'global' })
-const { user } = useAlmhaAuth()
+const { user, isSuperAdmin, hasRole } = useAlmhaAuth()
 
-const isSuperAdmin = computed(() => user.value?.roles?.includes('super_admin'))
+const navigationItems = computed(() => {
+  const items = [
+    { label: t('nav.dashboard'), icon: 'i-heroicons-home', to: '/dashboard' }
+  ]
 
-const navigationItems = computed(() => [
-  { label: t('nav.dashboard'), icon: 'i-heroicons-home', to: '/dashboard' },
-  { label: t('nav.designs'), icon: 'i-heroicons-paint-brush', to: '/designs' },
-  { label: t('nav.blog'), icon: 'i-heroicons-document-text', to: '/blogs' },
-  { label: t('nav.procedures'), icon: 'i-heroicons-sparkles', to: '/procedures' },
-  { label: t('nav.teams'), icon: 'i-heroicons-user-group', to: '/teams' },
-  ...(isSuperAdmin.value ? [
-    { label: t('nav.users'), icon: 'i-heroicons-users', to: '/users' },
-    { label: t('nav.trash'), icon: 'i-heroicons-trash', to: '/trash' }
-  ] : []),
-])
+  if (hasRole('design_manager')) {
+    items.push({ label: t('nav.designs'), icon: 'i-heroicons-paint-brush', to: '/designs' })
+  }
+  
+  if (hasRole('blog_manager')) {
+    items.push({ label: t('nav.blog'), icon: 'i-heroicons-document-text', to: '/blogs' })
+  }
+  
+  if (hasRole('procedure_manager')) {
+    items.push({ label: t('nav.procedures'), icon: 'i-heroicons-sparkles', to: '/procedures' })
+  }
+  
+  if (hasRole('team_manager')) {
+    items.push({ label: t('nav.teams'), icon: 'i-heroicons-user-group', to: '/teams' })
+  }
+
+  if (isSuperAdmin.value) {
+    items.push({ label: t('nav.users'), icon: 'i-heroicons-users', to: '/users' })
+    items.push({ label: t('nav.trash'), icon: 'i-heroicons-trash', to: '/trash' })
+  }
+
+  return items
+})
 
 const isMobileMenuOpen = useState('mobileMenuOpen', () => false)
 </script>
