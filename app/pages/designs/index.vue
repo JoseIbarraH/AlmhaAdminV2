@@ -488,6 +488,18 @@ const getModeIcon = (mode: string) => {
   padding: 0;
 }
 
+@media (max-width: 640px) {
+  .designs-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+  }
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
 :root.dark .btn-refresh {
   background: #1e293b;
   border-color: #334155;

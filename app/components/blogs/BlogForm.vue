@@ -277,6 +277,12 @@ defineExpose({ handleSubmit, commitDeletions })
   border-color: #334155;
 }
 
+@media (max-width: 640px) {
+  .card-section {
+    padding: 1rem;
+  }
+}
+
 .section-title {
   font-size: 1rem;
   font-weight: 800;

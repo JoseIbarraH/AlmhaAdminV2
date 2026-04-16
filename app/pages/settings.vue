@@ -88,9 +88,9 @@ const userInitials = computed(() => {
     <div class="max-w-6xl mx-auto">
       
       <!-- Page Header -->
-      <header class="mb-16 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div class="flex items-center gap-6">
-          <div class="avatar-container">
+      <header class="mb-10 md:mb-16 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="flex flex-col sm:flex-row items-center text-center sm:text-left gap-4 sm:gap-6">
+          <div class="avatar-container shrink-0">
             <div class="avatar-surface">
               {{ userInitials }}
             </div>
@@ -98,30 +98,30 @@ const userInitials = computed(() => {
             <div class="avatar-status" :class="{ 'bg-green-500': !!user }"></div>
           </div>
           <div>
-            <h1 class="text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-none mb-2">
+            <h1 class="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-none mb-2">
               {{ t('profile.title') }}
             </h1>
-            <p class="text-slate-500 dark:text-slate-400 font-medium max-w-md">
+            <p class="text-slate-500 dark:text-slate-400 font-medium max-w-md mx-auto sm:mx-0 text-sm md:text-base">
               {{ t('profile.description') }}
             </p>
           </div>
         </div>
         
-        <div class="flex items-center gap-3 bg-white dark:bg-slate-800 p-2 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
-          <UBadge variant="soft" color="neutral" class="font-bold px-3 py-1">
+        <div class="flex justify-center bg-white dark:bg-slate-800 p-2 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm w-full md:w-auto">
+          <UBadge variant="soft" color="neutral" class="font-bold px-3 py-1 text-center truncate">
             {{ user?.email }}
           </UBadge>
         </div>
       </header>
 
-      <form @submit.prevent="handleUpdate" class="space-y-24 pb-20">
+      <form @submit.prevent="handleUpdate" class="space-y-16 md:space-y-24 pb-20">
         <!-- Section: Personal Info -->
-        <div class="grid grid-cols-12 gap-10">
+        <div class="grid grid-cols-12 gap-6 md:gap-10">
           <div class="col-span-12 lg:col-span-4">
-            <div class="sticky top-10 space-y-4">
+            <div class="sticky top-10 space-y-3 md:space-y-4">
               <div class="flex items-center gap-3 text-gold">
-                <UIcon name="i-heroicons-user-circle" class="w-6 h-6" />
-                <h2 class="text-xl font-black tracking-tight uppercase italic text-slate-800 dark:text-slate-200">
+                <UIcon name="i-heroicons-user-circle" class="w-6 h-6 shrink-0" />
+                <h2 class="text-lg md:text-xl font-black tracking-tight uppercase italic text-slate-800 dark:text-slate-200">
                   {{ t('profile.personal_info') }}
                 </h2>
               </div>
@@ -131,14 +131,14 @@ const userInitials = computed(() => {
             </div>
           </div>
           <div class="col-span-12 lg:col-span-8">
-            <UCard class="form-section-card" :ui="{ body: 'p-10' }">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <UFormField :label="t('profile.name')" class="group">
-                  <UInput v-model="state.name" size="lg" block class="input-premium" placeholder="Ingresa tu nombre..." />
+            <UCard class="form-section-card" :ui="{ body: 'p-5 sm:p-7 md:p-10' }">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 w-full">
+                <UFormField :label="t('profile.name')" class="w-full">
+                  <UInput v-model="state.name" size="lg" class="input-premium w-full" placeholder="Ingresa tu nombre..." />
                 </UFormField>
 
-                <UFormField :label="t('profile.email')" class="group">
-                  <UInput :value="user?.email" disabled size="lg" block class="input-premium opacity-60 cursor-not-allowed" />
+                <UFormField :label="t('profile.email')" class="w-full">
+                  <UInput :value="user?.email" disabled size="lg" class="input-premium w-full opacity-60 cursor-not-allowed" />
                 </UFormField>
               </div>
             </UCard>
@@ -146,12 +146,12 @@ const userInitials = computed(() => {
         </div>
 
         <!-- Section: Security -->
-        <div class="grid grid-cols-12 gap-10">
+        <div class="grid grid-cols-12 gap-6 md:gap-10">
           <div class="col-span-12 lg:col-span-4">
-            <div class="sticky top-10 space-y-4">
+            <div class="sticky top-10 space-y-3 md:space-y-4">
               <div class="flex items-center gap-3 text-gold">
-                <UIcon name="i-heroicons-shield-check" class="w-6 h-6" />
-                <h2 class="text-xl font-black tracking-tight uppercase italic text-slate-800 dark:text-slate-200">
+                <UIcon name="i-heroicons-shield-check" class="w-6 h-6 shrink-0" />
+                <h2 class="text-lg md:text-xl font-black tracking-tight uppercase italic text-slate-800 dark:text-slate-200">
                   {{ t('profile.security') }}
                 </h2>
               </div>
@@ -161,26 +161,26 @@ const userInitials = computed(() => {
             </div>
           </div>
           <div class="col-span-12 lg:col-span-8">
-            <UCard class="form-section-card" :ui="{ body: 'p-10' }">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <UFormField :label="t('profile.new_password')">
-                  <UInput v-model="state.password" type="password" size="lg" block class="input-premium" />
+            <UCard class="form-section-card" :ui="{ body: 'p-5 sm:p-7 md:p-10' }">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 w-full">
+                <UFormField :label="t('profile.new_password')" class="w-full">
+                  <UInput v-model="state.password" type="password" size="lg" class="input-premium w-full" />
                 </UFormField>
 
-                <UFormField :label="t('profile.confirm_password')">
-                  <UInput v-model="state.password_confirmation" type="password" size="lg" block class="input-premium" />
+                <UFormField :label="t('profile.confirm_password')" class="w-full">
+                  <UInput v-model="state.password_confirmation" type="password" size="lg" class="input-premium w-full" />
                 </UFormField>
               </div>
               
-              <div class="flex justify-end mt-10">
+              <div class="flex justify-end mt-8 md:mt-10">
                 <UButton 
                   type="submit" 
                   color="primary" 
                   size="lg" 
                   :loading="isUpdating" 
-                  class="btn-save-premium"
+                  class="btn-save-premium w-full sm:w-auto justify-center"
                 >
-                  <UIcon name="i-heroicons-check-circle" class="w-5 h-5" />
+                  <UIcon name="i-heroicons-check-circle" class="w-5 h-5 shrink-0" />
                   {{ t('profile.save_changes') }}
                 </UButton>
               </div>
@@ -190,12 +190,12 @@ const userInitials = computed(() => {
       </form>
 
       <!-- Section: Danger Zone -->
-      <div class="grid grid-cols-12 gap-10 pt-10 border-t border-slate-100 dark:border-slate-800 mb-20">
+      <div class="grid grid-cols-12 gap-6 md:gap-10 pt-10 border-t border-slate-100 dark:border-slate-800 mb-20">
         <div class="col-span-12 lg:col-span-4">
-          <div class="sticky top-10 space-y-4">
+          <div class="sticky top-10 space-y-3 md:space-y-4">
             <div class="flex items-center gap-3 text-red-500">
-              <UIcon name="i-heroicons-fire" class="w-6 h-6" />
-              <h2 class="text-xl font-black tracking-tight uppercase italic text-red-600 dark:text-red-400">
+              <UIcon name="i-heroicons-fire" class="w-6 h-6 shrink-0" />
+              <h2 class="text-lg md:text-xl font-black tracking-tight uppercase italic text-red-600 dark:text-red-400">
                 {{ t('profile.danger_zone') }}
               </h2>
             </div>
@@ -205,29 +205,29 @@ const userInitials = computed(() => {
           </div>
         </div>
         <div class="col-span-12 lg:col-span-8">
-          <UCard class="danger-zone-card-premium" :ui="{ body: 'p-10' }">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-8">
+          <UCard class="danger-zone-card-premium" :ui="{ body: 'p-5 sm:p-7 md:p-10' }">
+            <div class="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left justify-between gap-6 md:gap-8">
               <div class="space-y-3">
                 <h3 class="text-lg font-bold text-slate-800 dark:text-white">{{ t('profile.delete_account') }}</h3>
-                <p class="text-sm text-slate-500 dark:text-slate-400 max-w-md">
+                <p class="text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto sm:mx-0">
                   {{ t('profile.delete_warning') }}
                 </p>
               </div>
               
-              <div class="flex flex-col items-end gap-3">
+              <div class="flex flex-col items-center sm:items-end gap-3 w-full sm:w-auto">
                 <UButton
                   color="error"
                   variant="soft"
                   size="lg"
                   :disabled="user?.is_main_admin"
-                  class="btn-delete-premium"
+                  class="btn-delete-premium w-full sm:w-auto justify-center"
                   @click="showDeleteConfirm = true"
                 >
                   {{ t('profile.delete_account') }}
                 </UButton>
                 
-                <div v-if="user?.is_main_admin" class="restriction-notice">
-                  <UIcon name="i-heroicons-shield-check" class="w-4 h-4" />
+                <div v-if="user?.is_main_admin" class="restriction-notice w-full sm:w-auto text-center sm:text-left">
+                  <UIcon name="i-heroicons-shield-check" class="w-4 h-4 shrink-0" />
                   <span>{{ t('profile.main_admin_delete_restricted') }}</span>
                 </div>
               </div>
@@ -240,39 +240,39 @@ const userInitials = computed(() => {
     <!-- Confirm Dialog -->
     <UModal v-model:open="showDeleteConfirm">
       <template #content>
-        <UCard class="modal-premium-card" :ui="{ body: 'p-8', header: 'px-8 py-6', footer: 'px-8 py-4' }">
+        <UCard class="modal-premium-card" :ui="{ body: 'p-6 sm:p-8', header: 'px-6 sm:px-8 py-5 sm:py-6', footer: 'px-6 sm:px-8 py-4' }">
           <template #header>
-            <div class="flex items-center gap-4">
-               <div class="modal-icon-danger">
+            <div class="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4">
+               <div class="modal-icon-danger shrink-0 mx-auto sm:mx-0">
                  <UIcon name="i-heroicons-exclamation-triangle" class="w-7 h-7" />
                </div>
                <div>
-                 <h3 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
+                 <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
                    {{ t('profile.confirm_delete_title') }}
                  </h3>
-                 <p class="text-slate-500 text-xs mt-1 font-bold italic uppercase tracking-widest">{{ t('profile.critical_procedure') }}</p>
+                 <p class="text-slate-500 text-[10px] sm:text-xs mt-1 sm:mt-2 font-bold italic uppercase tracking-widest">{{ t('profile.critical_procedure') }}</p>
                </div>
             </div>
           </template>
 
-          <div class="space-y-6">
-            <p class="text-slate-600 dark:text-slate-300 font-medium text-lg leading-relaxed">
+          <div class="space-y-5 sm:space-y-6 text-center sm:text-left">
+            <p class="text-slate-600 dark:text-slate-300 font-medium text-base sm:text-lg leading-relaxed">
               ¿Deseas proceder con la eliminación de tu cuenta? 
             </p>
-            <div class="warning-box">
+            <div class="warning-box flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-3">
                <UIcon name="i-heroicons-information-circle" class="w-5 h-5 shrink-0" />
-               <p class="text-sm font-medium">
+               <p class="text-xs sm:text-sm font-medium">
                  {{ t('profile.delete_permanent_warning') }}
                </p>
             </div>
           </div>
 
           <template #footer>
-            <div class="flex justify-end gap-4">
-              <UButton variant="ghost" color="neutral" size="lg" @click="showDeleteConfirm = false" class="font-bold px-8">
+            <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 sm:gap-4">
+              <UButton variant="ghost" color="neutral" size="lg" @click="showDeleteConfirm = false" class="font-bold justify-center w-full sm:w-auto px-8">
                 {{ t('blogs.form.cancel') }}
               </UButton>
-              <UButton color="error" size="lg" :loading="isDeleting" @click="handleDelete" class="btn-confirm-delete px-10">
+              <UButton color="error" size="lg" :loading="isDeleting" @click="handleDelete" class="btn-confirm-delete justify-center w-full sm:w-auto px-10">
                 {{ t('profile.confirm_delete_btn') }}
               </UButton>
             </div>

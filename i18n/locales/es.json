@@ -12,8 +12,57 @@
     "english": "Inglés",
     "admin": "Administrador",
     "super_admin": "Super Admin",
-    "profile": "Mi Perfil",
+    "settings": "Ajustes",
+    "users": "Usuarios",
     "trash": "Papelera"
+  },
+  "users": {
+    "title": "Gestión de Usuarios",
+    "description": "Administra las cuentas de usuario y sus respectivos roles de acceso.",
+    "new": "Nuevo Usuario",
+    "search": "Buscar por nombre o correo...",
+    "empty": "No hay usuarios registrados.",
+    "table": {
+      "name": "Usuario",
+      "email": "Correo",
+      "roles": "Roles",
+      "status": "Estado",
+      "actions": "Acciones",
+      "you": "Usted"
+    },
+    "status": {
+      "active": "Activo",
+      "inactive": "Inactivo"
+    },
+    "roles": {
+      "super_admin": "Super Admin",
+      "user_manager": "Gestor de Usuarios",
+      "blog_manager": "Gestor de Blog",
+      "procedure_manager": "Gestor de Procedimientos",
+      "team_manager": "Gestor de Equipo",
+      "audit_viewer": "Auditor"
+    },
+    "form": {
+      "create_title": "Crear Usuario",
+      "edit_title": "Editar Usuario",
+      "name": "Nombre completo",
+      "email": "Correo electrónico",
+      "password": "Nueva contraseña",
+      "password_hint": "Dejar en blanco si no deseas cambiarla",
+      "roles": "Asignar Roles",
+      "status": "Usuario Activo",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "error": "Error al guardar el usuario",
+      "success_create": "Usuario creado con éxito",
+      "success_update": "Usuario actualizado con éxito",
+      "success_delete": "Usuario eliminado y enviado a la papelera"
+    },
+    "delete_confirm": {
+      "title": "Eliminar Usuario",
+      "desc": "¿Estás seguro de que deseas eliminar a este usuario? Perderá acceso inmediato al panel.",
+      "btn": "Eliminar"
+    }
   },
   "blogs": {
     "header": {

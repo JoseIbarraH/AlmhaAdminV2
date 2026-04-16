@@ -6,6 +6,7 @@ const config = useRuntimeConfig()
 const colorMode = useColorMode()
 const { logout, user } = useAlmhaAuth()
 const { locale, setLocale, t } = useI18n({ useScope: 'global' })
+const isMobileMenuOpen = useState('mobileMenuOpen', () => false)
 
 const currentLogo = computed(() => {
   return colorMode.value === 'dark' ? logoDarkImg : logoLightImg
@@ -39,9 +40,9 @@ const isSuperAdmin = computed(() => user.value?.roles?.includes('super_admin'))
 const userMenuItems = computed(() => [
   [
     {
-      label: t('nav.profile'),
-      icon: 'i-heroicons-user',
-      to: '/profile'
+      label: t('nav.settings'),
+      icon: 'i-heroicons-cog-8-tooth',
+      to: '/settings'
     }
   ],
   [
@@ -58,6 +59,10 @@ const userMenuItems = computed(() => [
 <template>
   <header class="navbar">
     <div class="navbar-left">
+      <button class="icon-btn menu-toggle-btn" @click="isMobileMenuOpen = !isMobileMenuOpen" aria-label="Toggle Menu">
+        <UIcon name="i-heroicons-bars-3" class="icon-lg" />
+      </button>
+
       <div class="logo-wrapper">
         <ClientOnly>
           <img :src="currentLogo" alt="Almha Logo" class="logo-img" />
@@ -312,5 +317,33 @@ const userMenuItems = computed(() => [
 .icon-md {
   width: 20px;
   height: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .brand-name {
+    display: none;
+  }
+  
+  .navbar-right {
+    gap: 0.5rem;
+  }
+  
+  .navbar {
+    padding: 0 1rem;
+  }
+  
+  .lang-text {
+    display: none;
+  }
+}
+
+.menu-toggle-btn {
+  display: none;
+}
+@media (max-width: 768px) {
+  .menu-toggle-btn {
+    display: flex;
+  }
 }
 </style>

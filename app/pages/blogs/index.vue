@@ -14,6 +14,40 @@ const isCategoryModalOpen = ref(false)
 const debouncedSearch = ref('')
 let debounceTimer: any = null
 
+const toast = useToast()
+const isDeleteModalOpen = ref(false)
+const blogToDelete = ref<number | string | null>(null)
+const isDeleting = ref(false)
+
+const confirmDelete = (id: number | string) => {
+  blogToDelete.value = id
+  isDeleteModalOpen.value = true
+}
+
+const cancelDelete = () => {
+  blogToDelete.value = null
+  isDeleteModalOpen.value = false
+}
+
+const executeDelete = async () => {
+  if (!blogToDelete.value) return
+  isDeleting.value = true
+  try {
+    await useApi(`/blogs/${blogToDelete.value}`, {
+      method: 'DELETE'
+    })
+    toast.add({ title: 'Blog eliminado', description: 'El artículo ha sido enviado a la papelera.', color: 'primary' })
+    refresh()
+  } catch (e: any) {
+    console.error(e)
+    toast.add({ title: 'Error', description: e.message || 'Error occurred', color: 'error' })
+  } finally {
+    isDeleting.value = false
+    cancelDelete()
+  }
+}
+
+
 // Debounce para la búsqueda
 watch(searchQuery, (newVal) => {
   if (debounceTimer) clearTimeout(debounceTimer)
@@ -268,7 +302,7 @@ const handleCategoriesUpdate = () => {
               <NuxtLink :to="`/blogs/${blog.id}/edit`" class="action-btn edit" :title="$t('blogs.card.actions.edit')">
                 <UIcon name="i-heroicons-pencil-square" class="icon-sm" />
               </NuxtLink>
-              <button class="action-btn delete" :title="$t('blogs.card.actions.delete')">
+              <button class="action-btn delete" :title="$t('blogs.card.actions.delete')" @click="confirmDelete(blog.id)">
                 <UIcon name="i-heroicons-trash" class="icon-sm" />
               </button>
             </div>
@@ -317,6 +351,34 @@ const handleCategoriesUpdate = () => {
 
     <!-- Modals -->
     <BlogCategoryModal v-model="isCategoryModalOpen" @updated="handleCategoriesUpdate" />
+
+    <!-- Delete Confirm Modal -->
+    <Teleport to="body">
+      <Transition name="modal-fade">
+        <div v-if="isDeleteModalOpen" class="modal-overlay" @click.self="cancelDelete">
+          <div class="modal-box">
+            <div class="modal-icon-wrap text-red-500 bg-red-100 dark:bg-red-900/30">
+              <UIcon name="i-heroicons-exclamation-triangle" class="modal-icon" />
+            </div>
+            <h3 class="modal-title font-bold text-xl mt-4 text-slate-800 dark:text-white">
+              Eliminar Artículo
+            </h3>
+            <p class="modal-desc text-slate-600 dark:text-slate-400 mt-2">
+              ¿Estás seguro de que deseas eliminar este artículo? Esta acción lo enviará a la papelera.
+            </p>
+            <div class="modal-actions mt-6 flex justify-end gap-3">
+              <button class="btn-ghost px-4 py-2 rounded-lg font-medium border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" @click="cancelDelete">
+                Cancelar
+              </button>
+              <button class="btn-danger px-4 py-2 rounded-lg font-medium bg-red-600 text-white hover:bg-red-700 flex items-center gap-2 transition-colors" @click="executeDelete" :disabled="isDeleting">
+                <UIcon v-if="isDeleting" name="i-heroicons-arrow-path" class="icon-sm animate-spin" />
+                <span v-else>Eliminar</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -333,6 +395,18 @@ const handleCategoriesUpdate = () => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2.5rem;
+}
+
+@media (max-width: 640px) {
+  .blogs-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+  }
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
 }
 
 .header-title {
@@ -478,6 +552,24 @@ const handleCategoriesUpdate = () => {
   margin-bottom: 2.5rem;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   transition: background 0.3s, border-color 0.3s;
+}
+
+@media (max-width: 640px) {
+  .blogs-toolbar {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  .search-wrap {
+    width: 100%;
+  }
+  .filters-wrap {
+    width: 100%;
+    display: flex;
+  }
+  .custom-select {
+    width: 100%;
+  }
 }
 
 :root.dark .blogs-toolbar {
@@ -690,7 +782,7 @@ const handleCategoriesUpdate = () => {
 /* Grid Layout */
 .blogs-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 2.5rem;
 }
 
@@ -1103,6 +1195,55 @@ const handleCategoriesUpdate = () => {
     flex-direction: column;
     gap: 1.5rem;
     text-align: center;
+    flex-shrink: 0;
   }
+}
+
+/* Modals global spacing (already imported from variables if used) */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
+
+.modal-box {
+  background: white;
+  padding: 2rem;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+:root.dark .modal-box {
+  background: #1e293b;
+  border: 1px solid #334155;
+}
+
+.modal-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
 }
 </style>

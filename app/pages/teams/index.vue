@@ -360,6 +360,18 @@ const executeDelete = async () => {
   margin-bottom: 2.5rem;
 }
 
+@media (max-width: 640px) {
+  .teams-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+  }
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
 .header-title {
   font-size: 2.25rem;
   font-weight: 800;
@@ -472,6 +484,24 @@ const executeDelete = async () => {
   margin-bottom: 2.5rem;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   transition: background 0.3s, border-color 0.3s;
+}
+
+@media (max-width: 640px) {
+  .teams-toolbar {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  .search-wrap {
+    width: 100%;
+  }
+  .filters-wrap {
+    width: 100%;
+    display: flex;
+  }
+  .custom-select {
+    width: 100%;
+  }
 }
 
 :root.dark .teams-toolbar {
@@ -689,7 +719,7 @@ const executeDelete = async () => {
 /* Grid Layout */
 .teams-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 2rem;
 }
 

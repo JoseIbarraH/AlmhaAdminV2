@@ -10,25 +10,60 @@ const navigationItems = computed(() => [
   { label: t('nav.blog'), icon: 'i-heroicons-document-text', to: '/blogs' },
   { label: t('nav.procedures'), icon: 'i-heroicons-sparkles', to: '/procedures' },
   { label: t('nav.teams'), icon: 'i-heroicons-user-group', to: '/teams' },
-  ...(isSuperAdmin.value ? [{ label: t('nav.trash'), icon: 'i-heroicons-trash', to: '/trash' }] : []),
+  ...(isSuperAdmin.value ? [
+    { label: t('nav.users'), icon: 'i-heroicons-users', to: '/users' },
+    { label: t('nav.trash'), icon: 'i-heroicons-trash', to: '/trash' }
+  ] : []),
 ])
+
+const isMobileMenuOpen = useState('mobileMenuOpen', () => false)
 </script>
 
 <template>
-  <aside class="sidebar">
-    <nav class="sidebar-nav">
-      <NuxtLink
-        v-for="item in navigationItems"
-        :key="item.to"
-        :to="item.to"
-        class="nav-link"
-        active-class="nav-link-active"
-      >
-        <UIcon :name="item.icon" class="nav-icon" />
-        <span class="nav-label">{{ item.label }}</span>
-      </NuxtLink>
-    </nav>
-  </aside>
+  <div>
+    <!-- Desktop Sidebar -->
+    <aside class="sidebar desktop-sidebar">
+      <nav class="sidebar-nav">
+        <NuxtLink
+          v-for="item in navigationItems"
+          :key="item.to"
+          :to="item.to"
+          class="nav-link"
+          active-class="nav-link-active"
+        >
+          <UIcon :name="item.icon" class="nav-icon" />
+          <span class="nav-label">{{ item.label }}</span>
+        </NuxtLink>
+      </nav>
+    </aside>
+
+    <!-- Mobile Slideover -->
+    <USlideover v-model:open="isMobileMenuOpen" side="left">
+      <template #content>
+        <div class="mobile-sidebar-container">
+          <div class="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
+            <h2 class="font-bold text-lg text-slate-800 dark:text-white">Menú</h2>
+            <UButton color="neutral" variant="ghost" icon="i-heroicons-x-mark" @click="isMobileMenuOpen = false" />
+          </div>
+          <aside class="sidebar mobile-sidebar">
+            <nav class="sidebar-nav">
+              <NuxtLink
+                v-for="item in navigationItems"
+                :key="item.to"
+                :to="item.to"
+                class="nav-link"
+                active-class="nav-link-active"
+                @click="isMobileMenuOpen = false"
+              >
+                <UIcon :name="item.icon" class="nav-icon" />
+                <span class="nav-label">{{ item.label }}</span>
+              </NuxtLink>
+            </nav>
+          </aside>
+        </div>
+      </template>
+    </USlideover>
+  </div>
 </template>
 
 <style scoped>
@@ -96,11 +131,26 @@ const navigationItems = computed(() => [
   letter-spacing: -0.01em;
 }
 
+.mobile-sidebar-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f8fafc;
+}
+
+:root.dark .mobile-sidebar-container {
+  background: #0f172a;
+}
+
+.mobile-sidebar {
+  width: 100%;
+  height: auto;
+  flex: 1;
+  border-right: none;
+}
+
 @media (max-width: 768px) {
-  .sidebar {
-    width: 80px;
-  }
-  .nav-label {
+  .desktop-sidebar {
     display: none;
   }
 }
