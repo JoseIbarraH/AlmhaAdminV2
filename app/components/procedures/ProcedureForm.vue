@@ -183,6 +183,31 @@ watch(() => form.value.baseLang, (newLang) => {
   }
 })
 
+// Snapshot for patch-style updates
+const originalSnapshot = ref<Record<string, any>>({})
+
+const serializeForSnapshot = () => {
+  return {
+    title: form.value.title,
+    subtitle: form.value.subtitle,
+    categoryCode: form.value.categoryCode,
+    status: form.value.status,
+    sections: JSON.stringify(form.value.sections.map(s => ({ type: s.type, title: s.title, contentOne: s.contentOne, contentTwo: s.contentTwo }))),
+    faqs: JSON.stringify(form.value.faqs.map(f => ({ question: f.question, answer: f.answer, order: f.order }))),
+    preparationSteps: JSON.stringify(form.value.preparationSteps.map(ps => ({ title: ps.title, description: ps.description, order: ps.order }))),
+    recoveryPhases: JSON.stringify(form.value.recoveryPhases.map(rp => ({ period: rp.period, title: rp.title, description: rp.description, order: rp.order }))),
+    postOpDos: JSON.stringify(form.value.postOpDos.map(pi => ({ content: pi.content, order: pi.order }))),
+    postOpDonts: JSON.stringify(form.value.postOpDonts.map(pi => ({ content: pi.content, order: pi.order }))),
+    galleryPreviews: JSON.stringify(form.value.gallery.map(p => ({ id: p.id, before: p.before.preview, after: p.after.preview, order: p.order }))),
+  }
+}
+
+const takeSnapshot = () => {
+  if (props.isEdit) {
+    originalSnapshot.value = serializeForSnapshot()
+  }
+}
+
 // Update form when initialData changes (for reactive re-fetches)
 watch(() => props.initialData, (newData) => {
   if (!newData || !props.isEdit) return
@@ -266,7 +291,15 @@ watch(() => props.initialData, (newData) => {
 
   // Featured Image Preview
   featuredImagePreview.value = newData.image || null
+
+  // Re-take snapshot after data reload
+  nextTick(() => takeSnapshot())
 }, { deep: true })
+
+// Take initial snapshot once mounted
+onMounted(() => {
+  nextTick(() => takeSnapshot())
+})
 
 // Categories
 const isCategoryModalOpen = ref(false)
@@ -363,17 +396,8 @@ const handleSectionImage = (index: number, e: Event) => {
   }
 }
 
-const handleSubmit = () => {
-  const formData = new FormData()
-  formData.append('title', form.value.title)
-  formData.append('subtitle', form.value.subtitle)
-  formData.append('categoryCode', form.value.categoryCode)
-  formData.append('status', form.value.status)
-  formData.append('baseLang', form.value.baseLang)
-
-  if (form.value.image) formData.append('image', form.value.image)
-  else if (featuredImagePreview.value) formData.append('image', featuredImagePreview.value)
-
+// Helper to append sections to FormData
+const appendSections = (formData: FormData) => {
   form.value.sections.forEach((s: SectionItem, i: number) => {
     formData.append(`sections[${i}][type]`, s.type)
     formData.append(`sections[${i}][title]`, s.title)
@@ -382,27 +406,34 @@ const handleSubmit = () => {
     if (s.image) formData.append(`sections[${i}][image]`, s.image)
     else if (s.imagePreview) formData.append(`sections[${i}][image]`, s.imagePreview)
   })
+}
 
+const appendFaqs = (formData: FormData) => {
   form.value.faqs.forEach((f: FAQItem, i: number) => {
     formData.append(`faqs[${i}][question]`, f.question)
     formData.append(`faqs[${i}][answer]`, f.answer)
     formData.append(`faqs[${i}][order]`, String(f.order))
   })
+}
 
+const appendPreparationSteps = (formData: FormData) => {
   form.value.preparationSteps.forEach((ps: PreparationStep, i: number) => {
     formData.append(`preparationSteps[${i}][title]`, ps.title)
     formData.append(`preparationSteps[${i}][description]`, ps.description)
     formData.append(`preparationSteps[${i}][order]`, String(ps.order))
   })
+}
 
+const appendRecoveryPhases = (formData: FormData) => {
   form.value.recoveryPhases.forEach((rp: RecoveryPhase, i: number) => {
     formData.append(`recoveryPhases[${i}][period]`, rp.period)
     formData.append(`recoveryPhases[${i}][title]`, rp.title)
     formData.append(`recoveryPhases[${i}][description]`, rp.description)
     formData.append(`recoveryPhases[${i}][order]`, String(rp.order))
   })
+}
 
-  // Combine Dos and Donts
+const appendInstructions = (formData: FormData) => {
   const groupedInstructions = [
     ...form.value.postOpDos.map((pi: PostOpInstruction) => ({ ...pi, type: 'do' })),
     ...form.value.postOpDonts.map((pi: PostOpInstruction) => ({ ...pi, type: 'dont' }))
@@ -412,22 +443,71 @@ const handleSubmit = () => {
     formData.append(`postoperativeInstructions[${i}][content]`, pi.content)
     formData.append(`postoperativeInstructions[${i}][order]`, String(pi.order))
   })
+}
 
+const appendGallery = (formData: FormData) => {
   form.value.gallery.forEach((pair: GalleryPair, i: number) => {
-    // Send before
     formData.append(`gallery[${i * 2}][type]`, 'before')
     formData.append(`gallery[${i * 2}][order]`, String(i))
     formData.append(`gallery[${i * 2}][pairId]`, String(pair.id))
     if (pair.before.image) formData.append(`gallery[${i * 2}][path]`, pair.before.image)
     else if (pair.before.preview) formData.append(`gallery[${i * 2}][path]`, pair.before.preview)
 
-    // Send after
     formData.append(`gallery[${i * 2 + 1}][type]`, 'after')
     formData.append(`gallery[${i * 2 + 1}][order]`, String(i))
     formData.append(`gallery[${i * 2 + 1}][pairId]`, String(pair.id))
     if (pair.after.image) formData.append(`gallery[${i * 2 + 1}][path]`, pair.after.image)
     else if (pair.after.preview) formData.append(`gallery[${i * 2 + 1}][path]`, pair.after.preview)
   })
+}
+
+const handleSubmit = () => {
+  const formData = new FormData()
+
+  // baseLang is always required
+  formData.append('baseLang', form.value.baseLang)
+
+  if (props.isEdit) {
+    // Patch-style: only send changed fields
+    const snap = originalSnapshot.value
+    const current = serializeForSnapshot()
+
+    // Scalar fields
+    if (current.title !== snap.title) formData.append('title', form.value.title)
+    if (current.subtitle !== snap.subtitle) formData.append('subtitle', form.value.subtitle)
+    if (current.categoryCode !== snap.categoryCode) formData.append('categoryCode', form.value.categoryCode)
+    if (current.status !== snap.status) formData.append('status', form.value.status)
+
+    // Image: send if new file or existing path changed
+    if (form.value.image) formData.append('image', form.value.image)
+
+    // Array fields: send whole array if any element changed, skip if identical
+    const hasSectionImages = form.value.sections.some(s => s.image !== null)
+    if (current.sections !== snap.sections || hasSectionImages) appendSections(formData)
+    if (current.faqs !== snap.faqs) appendFaqs(formData)
+    if (current.preparationSteps !== snap.preparationSteps) appendPreparationSteps(formData)
+    if (current.recoveryPhases !== snap.recoveryPhases) appendRecoveryPhases(formData)
+    if (current.postOpDos !== snap.postOpDos || current.postOpDonts !== snap.postOpDonts) appendInstructions(formData)
+
+    const hasNewGalleryImages = form.value.gallery.some(p => p.before.image !== null || p.after.image !== null)
+    if (current.galleryPreviews !== snap.galleryPreviews || hasNewGalleryImages) appendGallery(formData)
+  } else {
+    // Create mode: send everything
+    formData.append('title', form.value.title)
+    formData.append('subtitle', form.value.subtitle)
+    formData.append('categoryCode', form.value.categoryCode)
+    formData.append('status', form.value.status)
+
+    if (form.value.image) formData.append('image', form.value.image)
+    else if (featuredImagePreview.value) formData.append('image', featuredImagePreview.value)
+
+    appendSections(formData)
+    appendFaqs(formData)
+    appendPreparationSteps(formData)
+    appendRecoveryPhases(formData)
+    appendInstructions(formData)
+    appendGallery(formData)
+  }
 
   emit('submit', formData)
 }

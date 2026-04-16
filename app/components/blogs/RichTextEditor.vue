@@ -644,4 +644,39 @@ const mediaItems = computed(() => [
   transform: scale(1.15);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
+
+/* Force light theme colors on the editor content to match its white background */
+.editor-wrapper :deep(.prose) {
+  --tw-prose-body: #334155 !important;
+  --tw-prose-headings: #0f172a !important;
+  --tw-prose-lead: #475569 !important;
+  --tw-prose-links: #0f172a !important;
+  --tw-prose-bold: #0f172a !important;
+  --tw-prose-counters: #64748b !important;
+  --tw-prose-bullets: #cbd5e1 !important;
+  --tw-prose-hr: #e2e8f0 !important;
+  --tw-prose-quotes: #0f172a !important;
+  --tw-prose-quote-borders: #e2e8f0 !important;
+  --tw-prose-captions: #64748b !important;
+  --tw-prose-code: #0f172a !important;
+  --tw-prose-pre-code: #e2e8f0 !important;
+  --tw-prose-pre-bg: #1e293b !important;
+  --tw-prose-th-borders: #cbd5e1 !important;
+  --tw-prose-td-borders: #e2e8f0 !important;
+  color: var(--tw-prose-body) !important;
+}
+
+.editor-wrapper :deep(.prose h1),
+.editor-wrapper :deep(.prose h2),
+.editor-wrapper :deep(.prose h3),
+.editor-wrapper :deep(.prose h4),
+.editor-wrapper :deep(.prose h5),
+.editor-wrapper :deep(.prose h6),
+.editor-wrapper :deep(.prose strong) {
+  color: var(--tw-prose-headings) !important;
+}
+
+.editor-wrapper :deep(.prose a) {
+  color: var(--tw-prose-links) !important;
+}
 </style>

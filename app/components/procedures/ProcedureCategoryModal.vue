@@ -51,16 +51,6 @@ const form = ref({
   baseLang: currentLang.value
 })
 
-// Helper to generate random string
-const generateRandomCode = (length = 8) => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-  let result = ''
-  for (let i = 0; i < length; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length))
-  }
-  return result
-}
-
 const fetchCategories = async () => {
   isLoadingCategories.value = true
   try {
@@ -112,7 +102,7 @@ const resetForm = () => {
   selectedId.value = null
   form.value = {
     id: null,
-    code: generateRandomCode(),
+    code: '',
     title: '',
     baseLang: currentLang.value
   }
@@ -126,10 +116,14 @@ const saveCategory = async () => {
     const isEdit = !!form.value.id
     const endpoint = isEdit ? `/procedure-categories/${form.value.id}` : '/procedure-categories'
       
-    const payload = {
-      code: form.value.code,
+    const payload: Record<string, string> = {
       title: form.value.title,
       baseLang: form.value.baseLang
+    }
+
+    // Only send code when editing (backend auto-generates on create)
+    if (isEdit && form.value.code) {
+      payload.code = form.value.code
     }
 
     await useApi(endpoint, {
@@ -267,7 +261,7 @@ watch(isOpen, (newVal) => {
                   </div>
 
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
-                    <div class="field-premium opacity-60">
+                    <div v-if="form.id" class="field-premium opacity-60">
                       <label class="label-premium">{{ t('procedures.categories.labelSlug') }}</label>
                       <UInput v-model="form.code" disabled variant="none" class="input-premium font-mono text-sm" />
                     </div>

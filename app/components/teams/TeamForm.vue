@@ -113,8 +113,25 @@ const loadInitialData = () => {
   }
 }
 
+// Snapshot for patch-style updates
+const originalSnapshot = ref<Record<string, any>>({})
+
+const takeSnapshot = () => {
+  if (props.isEdit) {
+    originalSnapshot.value = {
+      name: name.value,
+      status: status.value,
+      specialization: specialization.value,
+      description: description.value,
+      biography: biography.value,
+      galleryPaths: galleryFiles.value.map(g => g.existingPath || '').join(','),
+    }
+  }
+}
+
 watch(() => props.initialData, () => {
   loadInitialData()
+  nextTick(() => takeSnapshot())
 }, { immediate: true })
 
 // Image handler
@@ -171,38 +188,76 @@ const handleSubmit = () => {
 
   const formData = new FormData()
   formData.append('baseLang', locale.value.split('-')[0] || 'es')
-  formData.append('name', name.value)
-  formData.append('status', status.value)
 
-  if (userId.value) {
-    formData.append('userId', userId.value)
-  }
+  if (props.isEdit) {
+    // Patch-style: only send changed fields
+    const snap = originalSnapshot.value
 
-  if (specialization.value) {
-    formData.append('specialization', specialization.value)
-  }
-
-  if (description.value) {
-    formData.append('description', description.value)
-  }
-
-  if (biography.value) {
-    formData.append('biography', biography.value)
-  }
-
-  if (imageFile.value) {
-    formData.append('image', imageFile.value)
-  }
-
-  // Gallery
-  galleryFiles.value.forEach((item, index) => {
-    if (item.file) {
-      formData.append(`gallery[${index}][path]`, item.file)
-    } else if (item.existingPath) {
-      formData.append(`gallery[${index}][path]`, item.existingPath)
+    if (name.value !== snap.name) {
+      formData.append('name', name.value)
     }
-    formData.append(`gallery[${index}][order]`, String(item.order))
-  })
+    if (status.value !== snap.status) {
+      formData.append('status', status.value)
+    }
+    if (specialization.value !== snap.specialization) {
+      formData.append('specialization', specialization.value)
+    }
+    if (description.value !== snap.description) {
+      formData.append('description', description.value)
+    }
+    if (biography.value !== snap.biography) {
+      formData.append('biography', biography.value)
+    }
+
+    // Image: send only if new file
+    if (imageFile.value) {
+      formData.append('image', imageFile.value)
+    }
+
+    // Gallery: send only if changed (new files added, items removed, or reordered)
+    const currentGalleryPaths = galleryFiles.value.map(g => g.existingPath || '').join(',')
+    const hasNewGalleryFiles = galleryFiles.value.some(g => g.file !== null)
+    if (currentGalleryPaths !== snap.galleryPaths || hasNewGalleryFiles) {
+      galleryFiles.value.forEach((item, index) => {
+        if (item.file) {
+          formData.append(`gallery[${index}][path]`, item.file)
+        } else if (item.existingPath) {
+          formData.append(`gallery[${index}][path]`, item.existingPath)
+        }
+        formData.append(`gallery[${index}][order]`, String(item.order))
+      })
+    }
+  } else {
+    // Create mode: send everything
+    formData.append('name', name.value)
+    formData.append('status', status.value)
+
+    if (userId.value) {
+      formData.append('userId', userId.value)
+    }
+    if (specialization.value) {
+      formData.append('specialization', specialization.value)
+    }
+    if (description.value) {
+      formData.append('description', description.value)
+    }
+    if (biography.value) {
+      formData.append('biography', biography.value)
+    }
+    if (imageFile.value) {
+      formData.append('image', imageFile.value)
+    }
+
+    // Gallery
+    galleryFiles.value.forEach((item, index) => {
+      if (item.file) {
+        formData.append(`gallery[${index}][path]`, item.file)
+      } else if (item.existingPath) {
+        formData.append(`gallery[${index}][path]`, item.existingPath)
+      }
+      formData.append(`gallery[${index}][order]`, String(item.order))
+    })
+  }
 
   emit('submit', formData)
 }

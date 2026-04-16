@@ -56,8 +56,34 @@ const closeMenu = (e: MouseEvent) => {
   }
 }
 
+const { locale, t } = useI18n({ useScope: 'global' })
+const categoriesMap = ref<any[]>([])
+
+const fetchCategoriesList = async () => {
+  try {
+    const res = await useApi<any>('/blog-categories', {
+      headers: {
+        'Accept-Language': locale.value.split('-')[0] || 'es'
+      }
+    })
+    categoriesMap.value = res.data || []
+  } catch (e) {
+    console.error('Error fetching categories:', e)
+  }
+}
+
+const getCategoryName = (code: string) => {
+  const cat = categoriesMap.value.find(c => c.code === code)
+  return cat ? (cat.title || cat.name || code) : code
+}
+
 onMounted(() => {
   document.addEventListener('click', closeMenu)
+  fetchCategoriesList()
+})
+
+watch(locale, () => {
+  fetchCategoriesList()
 })
 
 onUnmounted(() => {
@@ -89,7 +115,6 @@ interface ApiResponse {
 }
 
 // Fetch de datos reactivo con tipado
-const { locale } = useI18n({ useScope: 'global' })
 const { data: response, pending, refresh, error } = await useAsyncData<ApiResponse>(
   'blogs',
   () => useApi<ApiResponse>('/blogs', {
@@ -230,7 +255,7 @@ const handleCategoriesUpdate = () => {
 
         <div class="card-body">
           <div class="card-meta">
-            <span class="cat">{{ blog.categoryCode }}</span>
+            <span class="cat">{{ getCategoryName(blog.categoryCode) }}</span>
             <span class="spacer">•</span>
             <span class="date">{{ formatDate(blog.publishedAt) }}</span>
           </div>

@@ -60,6 +60,9 @@ const { data: response, pending, refresh, error } = await useAsyncData<ApiRespon
       per_page: 8,
       search: debouncedSearch.value,
       status: selectedStatus.value
+    },
+    headers: {
+      'Accept-Language': locale.value.split('-')[0] || 'es'
     }
   }),
   {
@@ -97,8 +100,33 @@ const closeMenu = (e: MouseEvent) => {
   }
 }
 
+const categoriesMap = ref<any[]>([])
+
+const fetchCategoriesList = async () => {
+  try {
+    const res = await useApi<any>('/procedure-categories', {
+      headers: {
+        'Accept-Language': locale.value.split('-')[0] || 'es'
+      }
+    })
+    categoriesMap.value = res.data || []
+  } catch (e) {
+    console.error('Error fetching categories:', e)
+  }
+}
+
+const getCategoryName = (code: string) => {
+  const cat = categoriesMap.value.find(c => c.code === code)
+  return cat ? (cat.title || cat.name || code) : code
+}
+
 onMounted(() => {
   document.addEventListener('click', closeMenu)
+  fetchCategoriesList()
+})
+
+watch(locale, () => {
+  fetchCategoriesList()
 })
 
 onUnmounted(() => {
@@ -201,7 +229,7 @@ const handleCategoriesUpdate = () => {
 
         <div class="card-body">
           <div class="card-meta">
-            <span class="cat">{{ proc.categoryCode }}</span>
+            <span class="cat">{{ getCategoryName(proc.categoryCode) }}</span>
             <span class="spacer">•</span>
             <span class="views">
               <UIcon name="i-heroicons-eye" class="icon-xs inline-block mr-1" />

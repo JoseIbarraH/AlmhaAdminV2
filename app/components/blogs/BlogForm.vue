@@ -30,6 +30,20 @@ const form = ref({
   image: null as File | null
 })
 
+// Snapshot for patch-style updates (edit mode only)
+const originalSnapshot = ref<Record<string, any>>({})
+
+const takeSnapshot = () => {
+  if (props.isEdit) {
+    originalSnapshot.value = {
+      title: form.value.title,
+      content: form.value.content,
+      categoryCode: form.value.categoryCode,
+      writer: form.value.writer,
+    }
+  }
+}
+
 // Update form when initialData changes (for reactive re-fetches)
 watch(() => props.initialData, (newData) => {
   if (newData) {
@@ -39,8 +53,16 @@ watch(() => props.initialData, (newData) => {
     form.value.writer = newData.writer || ''
     // We keep the current baseLang as it was the one selected by the user
     // causing this refresh.
+
+    // Re-take snapshot after data reload
+    nextTick(() => takeSnapshot())
   }
 }, { deep: true })
+
+// Take initial snapshot once mounted
+onMounted(() => {
+  nextTick(() => takeSnapshot())
+})
 
 // Emit language change to parent to trigger re-fetch in Edit mode
 watch(() => form.value.baseLang, (newLang) => {
@@ -98,11 +120,35 @@ onMounted(() => {
 
 const handleSubmit = () => {
   const formData = new FormData()
-  formData.append('title', form.value.title)
-  formData.append('content', form.value.content)
-  formData.append('categoryCode', form.value.categoryCode)
-  formData.append('writer', form.value.writer)
+
+  // baseLang is always required
   formData.append('baseLang', form.value.baseLang)
+
+  if (props.isEdit) {
+    // Patch-style: only send changed fields
+    const snap = originalSnapshot.value
+
+    if (form.value.title !== snap.title) {
+      formData.append('title', form.value.title)
+    }
+    if (form.value.content !== snap.content) {
+      formData.append('content', form.value.content)
+    }
+    if (form.value.categoryCode !== snap.categoryCode) {
+      formData.append('categoryCode', form.value.categoryCode)
+    }
+    if (form.value.writer !== snap.writer) {
+      formData.append('writer', form.value.writer)
+    }
+  } else {
+    // Create mode: send everything
+    formData.append('title', form.value.title)
+    formData.append('content', form.value.content)
+    formData.append('categoryCode', form.value.categoryCode)
+    formData.append('writer', form.value.writer)
+  }
+
+  // Image is always sent if a new file was selected
   if (form.value.image) {
     formData.append('image', form.value.image)
   }
@@ -129,7 +175,7 @@ defineExpose({ handleSubmit, commitDeletions })
         <section class="card-section">
           <UFormField :label="t('blogs.form.title')" required>
             <UInput v-model="form.title" :placeholder="t('blogs.form.titlePlaceholder')" size="lg"
-              class="title-input" />
+              class="title-input w-full" />
           </UFormField>
 
           <UFormField :label="t('blogs.form.content')" class="mt-6">
