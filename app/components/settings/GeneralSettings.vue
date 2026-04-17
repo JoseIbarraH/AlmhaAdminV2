@@ -30,7 +30,20 @@ const procedureTag = '{{ procedure }}'
 // Sanitization logic for phone numbers
 const sanitizePhoneNumber = (value: string | undefined | null) => {
   if (!value) return ''
-  return value.replace(/[^0-9+\- ]/g, '')
+  
+  // Remove all characters that are not digits, plus, or space
+  let cleaned = value.replace(/[^0-9+ ]/g, '')
+  
+  if (cleaned.length > 0) {
+    // If it doesn't start with +, add it
+    if (!cleaned.startsWith('+')) {
+      cleaned = '+' + cleaned
+    }
+    // Remove any + that is not at the beginning
+    cleaned = cleaned.charAt(0) + cleaned.slice(1).replace(/\+/g, '')
+  }
+  
+  return cleaned
 }
 
 const blockNonNumeric = (e: KeyboardEvent) => {
@@ -38,7 +51,17 @@ const blockNonNumeric = (e: KeyboardEvent) => {
   // Allow navigation keys (Backspace, Delete, Arrow keys, Tab, etc.)
   if (e.ctrlKey || e.metaKey || char.length > 1) return
   
-  if (!/[0-9+\- ]/.test(char)) {
+  const target = e.target as HTMLInputElement
+  const isFirstChar = target.selectionStart === 0
+  
+  // If typing at the beginning, allow + or digit
+  if (isFirstChar && !/[0-9+]/.test(char)) {
+    e.preventDefault()
+    return
+  }
+
+  // If typing elsewhere, only allow digits or spaces
+  if (!isFirstChar && !/[0-9 ]/.test(char)) {
     e.preventDefault()
   }
 }
