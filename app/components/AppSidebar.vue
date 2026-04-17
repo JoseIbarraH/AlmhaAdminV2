@@ -7,10 +7,6 @@ const navigationItems = computed(() => {
     { label: t('nav.dashboard'), icon: 'i-heroicons-home', to: '/dashboard' }
   ]
 
-  if (hasRole('design_manager')) {
-    items.push({ label: t('nav.designs'), icon: 'i-heroicons-paint-brush', to: '/designs' })
-  }
-  
   if (hasRole('blog_manager')) {
     items.push({ label: t('nav.blog'), icon: 'i-heroicons-document-text', to: '/blogs' })
   }
@@ -22,13 +18,17 @@ const navigationItems = computed(() => {
   if (hasRole('team_manager')) {
     items.push({ label: t('nav.teams'), icon: 'i-heroicons-user-group', to: '/teams' })
   }
-
+  
   if (isSuperAdmin.value) {
     items.push({ label: t('nav.users'), icon: 'i-heroicons-users', to: '/users' })
     items.push({ label: t('nav.audits'), icon: 'i-heroicons-clipboard-document-list', to: '/audits' })
     items.push({ label: t('nav.trash'), icon: 'i-heroicons-trash', to: '/trash' })
   }
-
+  
+  if (hasRole('setting_manager')) {
+    items.push({ label: t('nav.designs'), icon: 'i-heroicons-cog-6-tooth', to: '/settings' })
+  }
+  
   return items
 })
 

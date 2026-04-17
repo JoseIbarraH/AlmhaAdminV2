@@ -4,7 +4,7 @@
     "blog": "Blog",
     "procedures": "Procedimientos",
     "teams": "Equipo",
-    "designs": "Diseño",
+    "designs": "Configuración",
     "logout": "Cerrar Sesión",
     "theme": "Cambiar tema",
     "language": "Idioma",
@@ -41,7 +41,7 @@
       "blog_manager": "Gestor de Blog",
       "procedure_manager": "Gestor de Procedimientos",
       "team_manager": "Gestor de Equipo",
-      "design_manager": "Gestor de Diseño",
+      "setting_manager": "Gestor de Configuración",
       "audit_viewer": "Auditor"
     },
     "form": {
@@ -396,6 +396,45 @@
       "successCreate": "Miembro creado exitosamente",
       "successUpdate": "Miembro actualizado exitosamente",
       "error": "Error al procesar la solicitud"
+    }
+  },
+  "settings": {
+    "header": {
+      "title": "Configuración del Sistema",
+      "description": "Administra los datos de contacto, redes sociales y preferencias visuales de tu sitio web."
+    },
+    "tabs": {
+      "general": "General",
+      "appearance": "Apariencia",
+      "system": "Sistema"
+    },
+    "general": {
+      "contact_title": "Datos de Contacto",
+      "social_title": "Redes Sociales",
+      "phone": "Teléfono de contacto",
+      "email": "Correo electrónico",
+      "location": "Ubicación física",
+      "whatsapp": "Número de WhatsApp",
+      "whatsapp_hint": "usa {tag} donde quieras que vaya el nombre de un procedimiento"
+    },
+    "social": {
+      "facebook": "Facebook URL",
+      "instagram": "Instagram URL",
+      "tiktok": "TikTok URL",
+      "twitter": "Twitter / X URL",
+      "linkedin": "LinkedIn URL",
+      "threads": "Threads URL"
+    },
+    "system": {
+      "maintenance_title": "Estado del Sistema",
+      "maintenance_desc": "Cuando el modo mantenimiento está activo, los visitantes verán una página de aviso y no podrán acceder al contenido público del sitio.",
+      "maintenance_toggle": "Activar modo mantenimiento"
+    },
+    "actions": {
+      "save": "Guardar cambios",
+      "saving": "Guardando...",
+      "success": "Configuración actualizada con éxito",
+      "error": "Error al actualizar la configuración"
     }
   },
   "designs": {
