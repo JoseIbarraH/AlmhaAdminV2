@@ -115,13 +115,17 @@ const handleMediaUpload = async (event: Event, item: DesignItem) => {
 // Save translation for item
 const savingItemId = ref<number | null>(null)
 const savedItemId = ref<number | null>(null)
+const savingDesignId = ref<number | null>(null)
 
-// Update specific translation field
 const updateItemField = (item: DesignItem, field: 'title' | 'subtitle', value: string) => {
   const currentLang = locale.value.split('-')[0] || 'es'
   const translations = [...item.translations]
   const transIndex = translations.findIndex(t => t.lang === currentLang)
   
+  // Update local item for immediate UI feedback
+  if (field === 'title') item.title = value
+  else item.subtitle = value
+
   if (transIndex > -1) {
     const existing = translations[transIndex]
     if (!existing) return
@@ -139,8 +143,22 @@ const updateItemField = (item: DesignItem, field: 'title' | 'subtitle', value: s
       subtitle: field === 'subtitle' ? value : ''
     })
   }
-  
-  saveTranslations(item, translations)
+
+  // Update item translations
+  item.translations = translations
+}
+
+const handleSaveSection = async (design: Design) => {
+  savingDesignId.value = design.id
+  try {
+    const promises = design.items.map(item => saveTranslations(item, item.translations))
+    await Promise.all(promises)
+    await refresh()
+  } catch (e) {
+    console.error('Error saving section:', e)
+  } finally {
+    savingDesignId.value = null
+  }
 }
 
 const saveTranslations = async (item: DesignItem, translations: DesignTranslation[]) => {
@@ -153,10 +171,11 @@ const saveTranslations = async (item: DesignItem, translations: DesignTranslatio
       body: formData
     })
     savedItemId.value = item.id
-    setTimeout(() => { savedItemId.value = null }, 2000)
-    await refresh()
+    setTimeout(() => { savedItemId.value = null }, 3000)
+    // Removed refresh() from here as it's handled at section level
   } catch (e) {
     console.error('Save translations error:', e)
+    throw e // Propagate error for Promise.all
   } finally {
     savingItemId.value = null
   }
@@ -250,18 +269,31 @@ const getModeIcon = (mode: string) => {
             <h2 class="section-title">{{ getSectionLabel(design.key) }}</h2>
             <span class="section-mode-badge">{{ design.display_mode.replace('_', ' ') }}</span>
           </div>
-          <div class="section-controls">
+          <div class="section-controls flex items-center gap-4">
+            <!-- Save Whole Section Button -->
+            <UButton
+              icon="i-heroicons-cloud-arrow-up"
+              color="primary"
+              variant="solid"
+              size="sm"
+              :loading="savingDesignId === design.id"
+              @click="handleSaveSection(design)"
+            >
+              {{ $t('designs.labels.save') }}
+            </UButton>
+
             <!-- Status Toggle -->
-            <label class="toggle-switch" :class="{ 'is-loading': togglingId === design.id }">
-              <input
-                type="checkbox"
-                :checked="design.status === 'active'"
-                :disabled="togglingId === design.id"
-                @change="toggleDesignStatus(design)"
+            <div class="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700">
+              <span class="text-xs font-semibold tracking-wider text-slate-500 dark:text-slate-400 uppercase">
+                {{ design.status === 'active' ? $t('designs.status.active') : $t('designs.status.inactive') }}
+              </span>
+              <UToggle
+                :model-value="design.status === 'active'"
+                :loading="togglingId === design.id"
+                color="primary"
+                @update:model-value="toggleDesignStatus(design)"
               />
-              <span class="toggle-slider"></span>
-              <span class="toggle-label">{{ design.status === 'active' ? $t('designs.status.active') : $t('designs.status.inactive') }}</span>
-            </label>
+            </div>
           </div>
         </div>
 
@@ -276,99 +308,110 @@ const getModeIcon = (mode: string) => {
                   <video v-if="item.media_type === 'video'" :src="item.url" class="media-content" controls></video>
                   <img v-else :src="item.url" class="media-content" />
                   <div class="media-overlay">
-                    <label class="overlay-btn" :title="$t('designs.labels.replaceMedia')">
-                      <UIcon name="i-heroicons-arrow-path" class="icon-sm" />
-                      <input type="file" accept="image/*,video/*" class="hidden" @change="handleMediaUpload($event, item)" :disabled="uploadingItemId === item.id" />
-                    </label>
+                    <UButton
+                      icon="i-heroicons-arrow-path"
+                      color="neutral"
+                      variant="solid"
+                      class="rounded-full shadow-lg"
+                      :title="$t('designs.labels.replaceMedia')"
+                      :loading="uploadingItemId === item.id"
+                      @click="(($refs[`fileInput_${item.id}`] as any)?.[0] as HTMLInputElement)?.click()"
+                    />
+                    <input :ref="`fileInput_${item.id}`" type="file" accept="image/*,video/*" class="hidden" @change="handleMediaUpload($event, item)" />
                   </div>
+                </div>
+                <div v-else class="media-empty" @click="(($refs[`fileInput_${item.id}`] as any)?.[0] as HTMLInputElement)?.click()">
+                  <UIcon name="i-heroicons-cloud-arrow-up" class="icon-upload" />
+                  <span>{{ $t('designs.labels.uploadMedia') }}</span>
+                  <input :ref="`fileInput_${item.id}`" type="file" accept="image/*,video/*" class="hidden" @change="handleMediaUpload($event, item)" />
                   <div v-if="uploadingItemId === item.id" class="media-loading">
                     <UIcon name="i-heroicons-arrow-path" class="icon-lg animate-spin" />
                   </div>
                 </div>
-                <label v-else class="media-empty">
-                  <UIcon name="i-heroicons-cloud-arrow-up" class="icon-upload" />
-                  <span>{{ $t('designs.labels.uploadMedia') }}</span>
-                  <input type="file" accept="image/*,video/*" class="hidden" @change="handleMediaUpload($event, item)" :disabled="uploadingItemId === item.id" />
-                  <div v-if="uploadingItemId === item.id" class="media-loading">
-                    <UIcon name="i-heroicons-arrow-path" class="icon-lg animate-spin" />
-                  </div>
-                </label>
               </div>
 
               <!-- Translations Form -->
-              <div class="item-translations">
-                <div class="trans-header">
-                  <span class="lang-tag">{{ locale === 'es' ? 'Español' : 'English' }}</span>
+              <div class="item-content grow p-5 flex flex-col gap-4">
+                <div class="flex items-center gap-2">
+                  <UBadge color="neutral" variant="soft" size="xs" class="font-bold uppercase tracking-wider">
+                    {{ locale === 'es' ? 'Español' : 'English' }}
+                  </UBadge>
                 </div>
-                <div class="trans-row">
-                  <input
-                    type="text"
-                    class="trans-input"
+                
+                <div class="space-y-4">
+                  <UInput
                     :placeholder="$t('designs.labels.title')"
-                    :value="item.title || ''"
-                    @change="(e: Event) => updateItemField(item, 'title', (e.target as HTMLInputElement).value)"
+                    :model-value="item.title || ''"
+                    variant="none"
+                    class="premium-input-field w-full"
+                    @update:model-value="(val: string) => updateItemField(item, 'title', val)"
                   />
-                  <input
-                    type="text"
-                    class="trans-input"
+                  <UInput
                     :placeholder="$t('designs.labels.subtitle')"
-                    :value="item.subtitle || ''"
-                    @change="(e: Event) => updateItemField(item, 'subtitle', (e.target as HTMLInputElement).value)"
+                    :model-value="item.subtitle || ''"
+                    variant="none"
+                    class="premium-input-field w-full"
+                    @update:model-value="(val: string) => updateItemField(item, 'subtitle', val)"
                   />
                 </div>
+              </div>
 
                 <!-- Item Controls -->
-                <div class="item-controls">
-                  <!-- Saved indicator -->
-                  <Transition name="fade">
-                    <span v-if="savedItemId === item.id" class="saved-badge">
-                      <UIcon name="i-heroicons-check-circle" class="icon-xs" />
-                      {{ $t('designs.labels.saved') }}
+                <div class="item-footer px-6 py-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between mt-auto">
+                  <div class="flex items-center">
+                    <!-- Saved indicator -->
+                    <Transition name="fade">
+                      <span v-if="savedItemId === item.id" class="text-[10px] font-bold text-success-500 flex items-center gap-1">
+                        <UIcon name="i-heroicons-check-circle" />
+                        {{ $t('designs.labels.saved') }}
+                      </span>
+                    </Transition>
+                    <span v-if="savingItemId === item.id" class="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                      <UIcon name="i-heroicons-arrow-path" class="animate-spin" />
+                      {{ $t('designs.labels.saving') }}
                     </span>
-                  </Transition>
-                  <span v-if="savingItemId === item.id" class="saving-badge">
-                    <UIcon name="i-heroicons-arrow-path" class="icon-xs animate-spin" />
-                    {{ $t('designs.labels.saving') }}
-                  </span>
+                  </div>
 
-                  <div class="item-controls-right">
+                  <div class="flex items-center gap-2">
                     <!-- Item status toggle (for carousels) -->
-                    <label v-if="design.display_mode === 'carousel'" class="toggle-switch toggle-switch--sm" :class="{ 'is-loading': togglingItemId === item.id }">
-                      <input
-                        type="checkbox"
-                        :checked="item.status === 'active'"
-                        :disabled="togglingItemId === item.id"
-                        @change="toggleItemStatus(item)"
-                      />
-                      <span class="toggle-slider"></span>
-                    </label>
+                    <UToggle
+                      v-if="design.display_mode === 'carousel'"
+                      :model-value="item.status === 'active'"
+                      :loading="togglingItemId === item.id"
+                      size="xs"
+                      color="primary"
+                      @update:model-value="toggleItemStatus(item)"
+                    />
+                    
                     <!-- Delete button (only for carousel items when more than 1) -->
-                    <button
+                    <UButton
                       v-if="design.display_mode === 'carousel' && design.items.length > 1"
-                      class="btn-delete-item"
-                      :disabled="deletingItemId === item.id"
+                      icon="i-heroicons-trash"
+                      color="error"
+                      variant="ghost"
+                      size="xs"
+                      square
+                      :loading="deletingItemId === item.id"
                       @click="confirmDeleteSlide(item.id)"
-                      :title="$t('designs.labels.deleteSlide')"
-                    >
-                      <UIcon v-if="deletingItemId === item.id" name="i-heroicons-arrow-path" class="icon-xs animate-spin" />
-                      <UIcon v-else name="i-heroicons-trash" class="icon-xs" />
-                    </button>
+                      class="hover:bg-error-50 dark:hover:bg-error-900/20"
+                    />
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Add Slide Button (carousel only) -->
-            <button
+            <!-- Add Slide Button -->
+            <UButton
               v-if="design.display_mode === 'carousel'"
-              class="add-slide-btn"
-              :disabled="addingSlideDesignId === design.id"
+              icon="i-heroicons-plus-circle"
+              color="primary"
+              variant="soft"
+              block
+              class="add-item-card h-full min-h-[300px]"
+              :loading="addingSlideDesignId === design.id"
               @click="addSlide(design)"
             >
-              <UIcon v-if="addingSlideDesignId === design.id" name="i-heroicons-arrow-path" class="icon-md animate-spin" />
-              <UIcon v-else name="i-heroicons-plus-circle" class="icon-md" />
-              <span>{{ $t('designs.labels.addSlide') }}</span>
-            </button>
+              <span class="font-bold underline tracking-tight">{{ $t('designs.labels.addSlide') }}</span>
+            </UButton>
           </div>
         </div>
       </div>
@@ -403,14 +446,33 @@ const getModeIcon = (mode: string) => {
 .designs-list {
   display: flex;
   flex-direction: column;
+  gap: 2.5rem;
+}
+
+.designs-skeleton {
+  display: flex;
+  flex-direction: column;
   gap: 2rem;
+}
+
+.skeleton-card {
+  height: 300px;
+  background: #f1f5f9;
+  border-radius: 20px;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .5; }
 }
 
 .design-section {
   background: white;
   border: 1px solid #e2e8f0;
-  border-radius: 20px;
+  border-radius: 24px;
   overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -427,20 +489,20 @@ const getModeIcon = (mode: string) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.25rem 1.75rem;
+  padding: 1.5rem 1.75rem;
   border-bottom: 1px solid #f1f5f9;
-  background: linear-gradient(135deg, rgba(160,124,40,0.03) 0%, transparent 100%);
+  background: linear-gradient(135deg, rgba(160,124,40,0.05) 0%, transparent 100%);
 }
 
 :root.dark .section-header {
   border-bottom-color: #334155;
-  background: linear-gradient(135deg, rgba(212,175,55,0.04) 0%, transparent 100%);
+  background: linear-gradient(135deg, rgba(212,175,55,0.06) 0%, transparent 100%);
 }
 
 .section-info {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .section-mode-icon {
@@ -491,24 +553,36 @@ const getModeIcon = (mode: string) => {
 }
 
 .item-card {
-  background: #f8fafc;
+  background: white;
   border: 1px solid #e2e8f0;
-  border-radius: 16px;
+  border-radius: 24px;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.item-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 :root.dark .item-card {
-  background: #0f172a;
+  background: #1e293b;
   border-color: #334155;
 }
 
 .item-media {
   position: relative;
-  aspect-ratio: 16/9;
-  background: #e2e8f0;
+  aspect-ratio: 16/10;
+  background: #f1f5f9;
   overflow: hidden;
+  border-radius: 4px 4px 0 0;
 }
 
+:root.dark .item-media {
+  background: #0f172a;
+}
 .media-content {
   width: 100%;
   height: 100%;
@@ -518,120 +592,124 @@ const getModeIcon = (mode: string) => {
 .media-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0,0,0,0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.3s;
+  transition: all 0.3s;
 }
 
 .item-media:hover .media-overlay {
   opacity: 1;
 }
 
-.overlay-btn {
-  width: 40px;
-  height: 40px;
-  background: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #1e293b;
-}
-
-.item-translations {
-  padding: 1rem;
-}
-
-.trans-input {
+.media-empty {
   width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  margin-bottom: 0.5rem;
-  font-size: 0.875rem;
-  background: white;
-}
-
-:root.dark .trans-input {
-  background: #1e293b;
-  border-color: #334155;
-  color: white;
-}
-
-.item-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 0.5rem;
-}
-
-.toggle-switch {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-}
-
-.toggle-slider {
-  width: 40px;
-  height: 20px;
-  background: #cbd5e1;
-  border-radius: 10px;
-  position: relative;
-}
-
-.toggle-slider::after {
-  content: '';
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 16px;
-  height: 16px;
-  background: white;
-  border-radius: 50%;
-  transition: transform 0.3s;
-}
-
-input:checked + .toggle-slider {
-  background: #a07c28;
-}
-
-input:checked + .toggle-slider::after {
-  transform: translateX(20px);
-}
-
-.btn-delete-item {
-  color: #ef4444;
-  cursor: pointer;
-  padding: 4px;
-}
-
-.add-slide-btn {
-  border: 2px dashed #e2e8f0;
-  border-radius: 16px;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  color: #64748b;
+  gap: 12px;
+  color: #94a3b8;
   cursor: pointer;
-  min-height: 200px;
   transition: all 0.3s;
 }
 
-.add-slide-btn:hover {
-  background: #f8fafc;
+.media-empty:hover {
+  background: #f1f5f9;
   color: #a07c28;
-  border-color: #a07c28;
 }
 
-:root.dark .add-slide-btn {
-  border-color: #334155;
+:root.dark .media-empty:hover {
+  background: #1e293b;
+  color: #d4af37;
+}
+
+.icon-upload {
+  width: 32px;
+  height: 32px;
+}
+
+.media-loading {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+:root.dark .media-loading {
+  background: rgba(15,23,42,0.8);
+}
+
+/* Input refinements */
+.premium-input-field {
+  transition: all 0.2s;
+}
+
+:deep(.premium-input-field .u-input) {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  font-weight: 500 !important;
+  padding: 12px 16px !important;
+  height: auto !important;
+}
+
+:root.dark :deep(.premium-input-field .u-input) {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: white !important;
+}
+
+:deep(.premium-input-field .u-input:focus) {
+  background: white !important;
+  border-color: #a07c28 !important;
+  box-shadow: 0 0 0 3px rgba(160,124,40,0.1) !important;
+}
+
+:root.dark :deep(.premium-input-field .u-input:focus) {
+  background: #1e293b !important;
+  border-color: #d4af37 !important;
+}
+
+/* Add Slide Button Style */
+.add-item-card {
+  border: 2px dashed #cbd5e1 !important;
+  border-radius: 24px !important;
+  font-size: 1rem !important;
+  transition: all 0.3s !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  background: transparent !important;
+  color: #64748b !important;
+}
+
+.add-item-card:hover {
+  background: rgba(160, 124, 40, 0.05) !important;
+  border-color: #a07c28 !important;
+  color: #a07c28 !important;
+  transform: translateY(-5px);
+}
+
+:root.dark .add-item-card {
+  border-color: #334155 !important;
+}
+
+:root.dark .add-item-card:hover {
+  border-color: #d4af37 !important;
+  color: #d4af37 !important;
+}
+
+:deep(.add-item-card .u-button-icon) {
+  width: 42px !important;
+  height: 42px !important;
+  margin-bottom: 8px !important;
 }
 
 .modal-overlay {
