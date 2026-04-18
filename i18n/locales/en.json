@@ -544,6 +544,19 @@
         "title": "Initialization failed",
         "description": "Verify the data (password must be at least 8 characters)."
       }
+    },
+    "verify": {
+      "title": "Account Verification",
+      "verifying": "Validating your credentials...",
+      "success": {
+        "title": "Account Verified!",
+        "description": "Your email address has been successfully confirmed. You can now access the Almha administrative panel."
+      },
+      "error": {
+        "title": "Invalid Link",
+        "description": "The verification token appears to be invalid or has already expired. Please request a new link or contact support."
+      },
+      "button": "Return to Login"
     }
   },
   "profile": {

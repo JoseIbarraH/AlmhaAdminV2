@@ -547,6 +547,19 @@
         "title": "Fallo en la inicialización",
         "description": "Verifica los datos (la contraseña debe tener al menos 8 caracteres)."
       }
+    },
+    "verify": {
+      "title": "Verificación de Cuenta",
+      "verifying": "Validando tus credenciales...",
+      "success": {
+        "title": "¡Cuenta Verificada!",
+        "description": "Tu dirección de correo electrónico ha sido confirmada con éxito. Ahora ya puedes acceder al panel administrativo de Almha."
+      },
+      "error": {
+        "title": "Enlace no válido",
+        "description": "El token de verificación parece ser inválido o ya ha expirado. Por favor, solicita un nuevo enlace o contacta con soporte."
+      },
+      "button": "Regresar al Login"
     }
   },
   "profile": {
