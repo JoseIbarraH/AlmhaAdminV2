@@ -98,6 +98,62 @@ const kpiCards = computed(() => {
     { title: 'Duración Media', value: `${Math.floor(Number(kpis.averageSessionDuration) / 60)}m ${Math.round(Number(kpis.averageSessionDuration) % 60)}s`, icon: 'i-heroicons-clock', color: 'text-rose-500' }
   ]
 })
+
+const ageSeries = computed(() => {
+  if (!stats.value?.demographics?.age) return []
+  return [{
+    name: 'Usuarios',
+    data: stats.value.demographics.age.map((item: any) => Number(item.sessions))
+  }]
+})
+
+const ageOptions = computed(() => {
+  if (!stats.value?.demographics?.age) return {}
+  return {
+    plotOptions: {
+      bar: {
+        horizontal: true,
+        borderRadius: 6,
+        barHeight: '60%',
+        distributed: false
+      }
+    },
+    colors: ['#f97316'],
+    xaxis: {
+      categories: stats.value.demographics.age.map((item: any) => item.userAgeBracket)
+    },
+    grid: {
+      xaxis: { lines: { show: true } },
+      yaxis: { lines: { show: false } }
+    }
+  }
+})
+
+const genderSeries = computed(() => {
+  if (!stats.value?.demographics?.gender) return []
+  return stats.value.demographics.gender.map((item: any) => Number(item.sessions))
+})
+
+const genderOptions = computed(() => {
+  if (!stats.value?.demographics?.gender) return {}
+  return {
+    labels: stats.value.demographics.gender.map((item: any) => 
+      item.userGender === 'male' ? 'Masculino' : 
+      item.userGender === 'female' ? 'Femenino' : 'Desconocido'
+    ),
+    colors: ['#0369a1', '#f97316', '#94a3b8'],
+    legend: {
+      position: 'bottom'
+    },
+    plotOptions: {
+      pie: {
+        donut: {
+          size: '65%'
+        }
+      }
+    }
+  }
+})
 </script>
 
 <template>
@@ -191,6 +247,55 @@ const kpiCards = computed(() => {
           height="350"
           :series="deviceSeries"
           :options="deviceOptions"
+        />
+      </UCard>
+    </div>
+
+    <!-- Demographics Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <UCard shadow-sm>
+        <template #header>
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-slate-800 dark:text-slate-200">Distribución por Edad</h3>
+            <span class="text-xs text-slate-400">Rango de edad de los usuarios</span>
+          </div>
+        </template>
+        <div v-if="loading" class="h-[350px] flex items-center justify-center">
+          <USkeleton class="h-full w-full rounded-lg" />
+        </div>
+        <div v-else-if="!stats?.demographics?.age?.length" class="flex flex-col items-center justify-center h-[350px] text-slate-400">
+          <UIcon name="i-heroicons-chart-bar" class="w-10 h-10 mb-2 opacity-20" />
+          <p>Datos demográficos no disponibles</p>
+        </div>
+        <AnalyticsChart
+          v-else
+          type="bar"
+          height="350"
+          :series="ageSeries"
+          :options="ageOptions"
+        />
+      </UCard>
+
+      <UCard shadow-sm>
+        <template #header>
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-slate-800 dark:text-slate-200">Género</h3>
+            <span class="text-xs text-slate-400">Desglose por género</span>
+          </div>
+        </template>
+        <div v-if="loading" class="h-[350px] flex items-center justify-center">
+          <USkeleton class="h-64 w-64 rounded-full" />
+        </div>
+        <div v-else-if="!stats?.demographics?.gender?.length" class="flex flex-col items-center justify-center h-[350px] text-slate-400">
+          <UIcon name="i-heroicons-chart-pie" class="w-10 h-10 mb-2 opacity-20" />
+          <p>Datos de género no disponibles</p>
+        </div>
+        <AnalyticsChart
+          v-else
+          type="donut"
+          height="350"
+          :series="genderSeries"
+          :options="genderOptions"
         />
       </UCard>
     </div>
