@@ -287,7 +287,7 @@ const getModeIcon = (mode: string) => {
               <span class="text-xs font-semibold tracking-wider text-slate-500 dark:text-slate-400 uppercase">
                 {{ design.status === 'active' ? $t('designs.status.active') : $t('designs.status.inactive') }}
               </span>
-              <UToggle
+              <USwitch
                 :model-value="design.status === 'active'"
                 :loading="togglingId === design.id"
                 color="primary"
@@ -374,7 +374,7 @@ const getModeIcon = (mode: string) => {
 
                   <div class="flex items-center gap-2">
                     <!-- Item status toggle (for carousels) -->
-                    <UToggle
+                    <USwitch
                       v-if="design.display_mode === 'carousel'"
                       :model-value="item.status === 'active'"
                       :loading="togglingItemId === item.id"
