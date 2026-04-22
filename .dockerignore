@@ -1,0 +1,38 @@
+# Nuxt build/dev artefacts (regenerated in the builder stage)
+.nuxt
+.output
+.nitro
+.data
+.cache
+dist
+
+# Dependencies (installed inside the image)
+node_modules
+
+# Environment files — injected by Dokploy at runtime
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Logs
+*.log
+logs
+
+# Git
+.git
+.gitignore
+.gitattributes
+.github
+
+# IDE / OS
+.idea
+.vscode
+.fleet
+.DS_Store
+Thumbs.db
+
+# Docs / meta (not needed in the image)
+README.md
+*.md
+docs
