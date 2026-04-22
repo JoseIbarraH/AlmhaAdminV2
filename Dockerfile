@@ -15,7 +15,7 @@
 #   docker build -t almha-admin .
 #
 # Run:
-#   docker run -p 3000:3000 --env-file .env almha-admin
+#   docker run -p 8787:8787 --env-file .env almha-admin
 # ======================================================================
 
 # ----------------------------------------------------------------------
@@ -43,9 +43,11 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 
 # Nitro server respects HOST:PORT from env.
+# Using 8787 (unusual high port) to avoid clashes with other services on the
+# host — 3000/8080/9000 are taken by common Node/proxy/PHP defaults.
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
-ENV PORT=3000
+ENV PORT=8787
 
 # Copy only the self-contained Nitro output (includes its own node_modules).
 COPY --from=builder /app/.output ./.output
@@ -53,12 +55,12 @@ COPY --from=builder /app/.output ./.output
 # Drop root for runtime (node:alpine already has the 'node' user).
 USER node
 
-EXPOSE 3000
+EXPOSE 8787
 
 # Nuxt has no built-in /health route; hitting / works and is cheap.
 # `start-period=30s` gives Nitro time to initialise before failing checks.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-    CMD wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1
+    CMD wget -qO- http://127.0.0.1:8787/ >/dev/null || exit 1
 
 # Nitro standalone entrypoint
 CMD ["node", "./.output/server/index.mjs"]
