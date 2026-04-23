@@ -261,7 +261,15 @@ const getModeIcon = (mode: string) => {
 
     <!-- Designs List -->
     <div v-else class="designs-list">
-      <div v-for="design in designs" :key="design.id" class="design-section" :class="{ 'is-inactive': design.status === 'inactive' }">
+      <div
+        v-for="design in designs"
+        :key="design.id"
+        class="design-section"
+        :class="[
+          { 'is-inactive': design.status === 'inactive' },
+          { 'design-section--background': design.key && design.key.startsWith('background_') },
+        ]"
+      >
         <!-- Section Header -->
         <div class="section-header">
           <div class="section-info">
@@ -269,7 +277,7 @@ const getModeIcon = (mode: string) => {
             <h2 class="section-title">{{ getSectionLabel(design.key) }}</h2>
             <span class="section-mode-badge">{{ design.display_mode.replace('_', ' ') }}</span>
           </div>
-          <div class="section-controls flex items-center gap-4">
+          <div class="section-controls">
             <!-- Save Whole Section Button -->
             <UButton
               icon="i-heroicons-cloud-arrow-up"
@@ -283,8 +291,8 @@ const getModeIcon = (mode: string) => {
             </UButton>
 
             <!-- Status Toggle -->
-            <div class="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700">
-              <span class="text-xs font-semibold tracking-wider text-slate-500 dark:text-slate-400 uppercase">
+            <div class="toggle-group">
+              <span class="toggle-label">
                 {{ design.status === 'active' ? $t('designs.status.active') : $t('designs.status.inactive') }}
               </span>
               <USwitch
@@ -445,8 +453,26 @@ const getModeIcon = (mode: string) => {
 /* Estilos extraídos de designs/index.vue */
 .designs-list {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 2.5rem;
+}
+
+/* Default: each design takes the full row (banners, brands, etc.) */
+.designs-list > .design-section {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+/* Backgrounds (background_1, _2, _3) sit side by side on wide screens. */
+.designs-list > .design-section--background {
+  flex: 1 1 calc(33.333% - 1.667rem);
+  min-width: 280px;
+}
+
+@media (max-width: 900px) {
+  .designs-list > .design-section--background {
+    flex: 1 1 100%;
+  }
 }
 
 .designs-skeleton {
@@ -487,9 +513,11 @@ const getModeIcon = (mode: string) => {
 
 .section-header {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 1.75rem;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
   border-bottom: 1px solid #f1f5f9;
   background: linear-gradient(135deg, rgba(160,124,40,0.05) 0%, transparent 100%);
 }
@@ -497,6 +525,57 @@ const getModeIcon = (mode: string) => {
 :root.dark .section-header {
   border-bottom-color: #334155;
   background: linear-gradient(135deg, rgba(212,175,55,0.06) 0%, transparent 100%);
+}
+
+.section-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.toggle-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-left: 0.75rem;
+  border-left: 1px solid #e2e8f0;
+}
+
+:root.dark .toggle-group {
+  border-left-color: #334155;
+}
+
+.toggle-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+:root.dark .toggle-label {
+  color: #94a3b8;
+}
+
+/* Background sections: stack header vertically in narrow cards */
+.design-section--background .section-header {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.design-section--background .section-info {
+  justify-content: center;
+}
+
+.design-section--background .section-controls {
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.design-section--background .toggle-group {
+  padding-left: 0.5rem;
 }
 
 .section-info {
