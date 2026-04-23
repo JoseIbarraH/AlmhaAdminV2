@@ -40,6 +40,10 @@ RUN npm run build
 # ----------------------------------------------------------------------
 FROM node:20-alpine AS runner
 
+# bash + curl so Dokploy's terminal and healthcheck tooling work as expected.
+# Alpine ships only `sh` by default, which breaks UIs that exec `bash`.
+RUN apk add --no-cache bash curl
+
 WORKDIR /app
 
 # Nitro server respects HOST:PORT from env.
