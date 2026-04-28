@@ -17,7 +17,7 @@ const blogId = route.params.id
 const editingLocale = ref<string>(locale.value)
 
 // Fetch blog data
-const { data: blogResponse, pending: loadingBlog, error } = await useAsyncData(
+const { data: blogResponse, pending: loadingBlog, error, refresh } = await useAsyncData(
   `blog-${blogId}`,
   () => useApi<{ data: any }>(`/blogs/${blogId}`, {
     headers: {
@@ -31,6 +31,10 @@ const { data: blogResponse, pending: loadingBlog, error } = await useAsyncData(
 
 const handleLanguageChange = (newLocale: string) => {
   editingLocale.value = newLocale
+}
+
+const handleStatusChanged = async () => {
+  await refresh()
 }
 
 const blogData = computed(() => blogResponse.value?.data || null)
@@ -98,7 +102,7 @@ const handleUpdate = async (formData: FormData) => {
       <UButton @click="router.back()" class="mt-4">Volver</UButton>
     </div>
 
-    <BlogForm v-else ref="formRef" :initial-data="blogData" :is-edit="true" :loading="loading" @submit="handleUpdate" @cancel="router.back()" @change-language="handleLanguageChange" />
+    <BlogForm v-else ref="formRef" :initial-data="blogData" :is-edit="true" :loading="loading" @submit="handleUpdate" @cancel="router.back()" @change-language="handleLanguageChange" @status-changed="handleStatusChanged" />
   </div>
 </template>
 

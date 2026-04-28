@@ -132,7 +132,24 @@
       "editDesc": "Actualiza la información y mejora el alcance de tu post.",
       "successCreate": "Artículo publicado exitosamente",
       "successUpdate": "Artículo actualizado exitosamente",
-      "error": "Ocurrió un error al procesar la solicitud"
+      "error": "Ocurrió un error al procesar la solicitud",
+      "status": "Estado del artículo",
+      "statusValues": {
+        "draft": "Borrador",
+        "published": "Publicado",
+        "archived": "Archivado"
+      },
+      "successStatus": "Estado actualizado exitosamente",
+      "errorStatus": "No se pudo cambiar el estado",
+      "notifyQueued": "Se enviarán correos a los suscriptores en segundo plano",
+      "publishModal": {
+        "title": "Confirmar publicación",
+        "description": "Al publicar este artículo será visible públicamente en el sitio.",
+        "notifyLabel": "Notificar a los suscriptores",
+        "notifyHelp": "Se enviará un correo a todos los suscriptores verificados con el resumen del artículo.",
+        "alreadyNotified": "Los suscriptores ya fueron notificados de este artículo en una publicación anterior.",
+        "confirm": "Publicar"
+      }
     },
     "categories": {
       "modalTitle": "Gestión de Categorías",

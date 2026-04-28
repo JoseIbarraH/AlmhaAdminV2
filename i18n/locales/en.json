@@ -132,7 +132,24 @@
       "editDesc": "Update the information and improve the reach of your post.",
       "successCreate": "Article published successfully",
       "successUpdate": "Article updated successfully",
-      "error": "An error occurred while processing the request"
+      "error": "An error occurred while processing the request",
+      "status": "Article status",
+      "statusValues": {
+        "draft": "Draft",
+        "published": "Published",
+        "archived": "Archived"
+      },
+      "successStatus": "Status updated successfully",
+      "errorStatus": "Could not change the status",
+      "notifyQueued": "Subscribers will be emailed in the background",
+      "publishModal": {
+        "title": "Confirm publication",
+        "description": "Once published this article will be visible publicly on the site.",
+        "notifyLabel": "Notify subscribers",
+        "notifyHelp": "An email with the article summary will be sent to every verified subscriber.",
+        "alreadyNotified": "Subscribers were already notified about this article in a previous publication.",
+        "confirm": "Publish"
+      }
     },
     "categories": {
       "modalTitle": "Categories Management",

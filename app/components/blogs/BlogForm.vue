@@ -18,8 +18,9 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['submit', 'cancel', 'change-language'])
+const emit = defineEmits(['submit', 'cancel', 'change-language', 'status-changed'])
 const { t, locales } = useI18n({ useScope: 'global' })
+const toast = useToast()
 
 const form = ref({
   title: props.initialData.translations?.[0]?.title || '',
@@ -27,8 +28,69 @@ const form = ref({
   categoryCode: props.initialData.categoryCode || '',
   writer: props.initialData.writer || '',
   baseLang: props.initialData.translations?.[0]?.lang || props.initialData.base_lang || 'es',
+  status: props.initialData.status || 'draft',
   image: null as File | null
 })
+
+const statusOptions: { value: 'draft' | 'published' | 'archived', icon: string, color: 'neutral' | 'primary' | 'warning' }[] = [
+  { value: 'draft',     icon: 'i-heroicons-pencil-square',  color: 'neutral' },
+  { value: 'published', icon: 'i-heroicons-check-circle',   color: 'primary' },
+  { value: 'archived',  icon: 'i-heroicons-archive-box',    color: 'warning' },
+]
+
+const statusLoading = ref(false)
+
+const publishModalOpen = ref(false)
+const publishNotify = ref(true)
+const alreadyNotified = computed(() => Boolean(props.initialData.notificationSentAt))
+
+const onStatusClick = (next: 'draft' | 'published' | 'archived') => {
+  if (next === form.value.status || statusLoading.value || !props.isEdit || !props.initialData.id) return
+
+  if (next === 'published') {
+    publishNotify.value = !alreadyNotified.value
+    publishModalOpen.value = true
+    return
+  }
+
+  applyStatusChange(next, false)
+}
+
+const confirmPublish = async () => {
+  publishModalOpen.value = false
+  await applyStatusChange('published', publishNotify.value && !alreadyNotified.value)
+}
+
+const applyStatusChange = async (
+  next: 'draft' | 'published' | 'archived',
+  notifySubscribers: boolean,
+) => {
+  const previous = form.value.status
+  form.value.status = next
+  statusLoading.value = true
+
+  try {
+    await useApi(`/blogs/${props.initialData.id}/status`, {
+      method: 'PATCH',
+      body: { status: next, notify_subscribers: notifySubscribers },
+    })
+    toast.add({
+      title: t('blogs.form.successStatus'),
+      description: notifySubscribers ? t('blogs.form.notifyQueued') : undefined,
+      color: 'success',
+    })
+    emit('status-changed', next)
+  } catch (err: any) {
+    form.value.status = previous
+    toast.add({
+      title: t('blogs.form.errorStatus'),
+      description: err?.data?.message || err?.message,
+      color: 'error',
+    })
+  } finally {
+    statusLoading.value = false
+  }
+}
 
 // Snapshot for patch-style updates (edit mode only)
 const originalSnapshot = ref<Record<string, any>>({})
@@ -51,6 +113,7 @@ watch(() => props.initialData, (newData) => {
     form.value.content = newData.translations?.[0]?.content || ''
     form.value.categoryCode = newData.categoryCode || ''
     form.value.writer = newData.writer || ''
+    form.value.status = newData.status || form.value.status
     // We keep the current baseLang as it was the one selected by the user
     // causing this refresh.
 
@@ -212,6 +275,26 @@ defineExpose({ handleSubmit, commitDeletions })
               readonly disabled icon="i-heroicons-language" size="lg"
               class="w-full bg-slate-50/50 dark:bg-slate-900/50" />
           </UFormField>
+
+          <UFormField v-if="props.isEdit" :label="t('blogs.form.status')" class="mt-4">
+            <div class="status-group">
+              <UButton
+                v-for="option in statusOptions"
+                :key="option.value"
+                type="button"
+                size="sm"
+                :icon="option.icon"
+                :color="form.status === option.value ? option.color : 'neutral'"
+                :variant="form.status === option.value ? 'solid' : 'soft'"
+                :loading="statusLoading && form.status === option.value"
+                :disabled="statusLoading"
+                class="status-btn"
+                @click="onStatusClick(option.value)"
+              >
+                {{ t(`blogs.form.statusValues.${option.value}`) }}
+              </UButton>
+            </div>
+          </UFormField>
         </section>
 
         <!-- Image -->
@@ -237,6 +320,45 @@ defineExpose({ handleSubmit, commitDeletions })
 
     <!-- Modal de categorías -->
     <BlogCategoryModal v-model="isCategoryModalOpen" @updated="fetchCategories" />
+
+    <!-- Modal de confirmación de publicación -->
+    <UModal v-model:open="publishModalOpen" :title="t('blogs.form.publishModal.title')">
+      <template #body>
+        <p class="text-sm text-slate-700 dark:text-slate-300 mb-4">
+          {{ t('blogs.form.publishModal.description') }}
+        </p>
+        <div
+          class="notify-toggle p-4 rounded-xl border"
+          :class="alreadyNotified
+            ? 'bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-700 opacity-70'
+            : 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900'"
+        >
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="font-semibold text-slate-900 dark:text-slate-100">
+                {{ t('blogs.form.publishModal.notifyLabel') }}
+              </p>
+              <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                {{ alreadyNotified
+                  ? t('blogs.form.publishModal.alreadyNotified')
+                  : t('blogs.form.publishModal.notifyHelp') }}
+              </p>
+            </div>
+            <USwitch v-model="publishNotify" :disabled="alreadyNotified" />
+          </div>
+        </div>
+      </template>
+      <template #footer>
+        <div class="flex justify-end gap-3 w-full">
+          <UButton variant="ghost" color="neutral" @click="publishModalOpen = false">
+            {{ t('blogs.form.cancel') }}
+          </UButton>
+          <UButton color="primary" :loading="statusLoading" @click="confirmPublish">
+            {{ t('blogs.form.publishModal.confirm') }}
+          </UButton>
+        </div>
+      </template>
+    </UModal>
   </form>
 </template>
 
@@ -289,6 +411,18 @@ defineExpose({ handleSubmit, commitDeletions })
   color: #1e293b;
   margin: 0;
   transition: color 0.3s;
+}
+
+.status-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.status-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  justify-content: center;
 }
 
 :root.dark .section-title {
