@@ -3,8 +3,7 @@ import logoDarkImg from '../assets/images/logo.png'
 import logoLightImg from '../assets/images/logo2.png'
 
 definePageMeta({
-  layout: false,
-  middleware: ['guest']
+  layout: false
 })
 
 const { t } = useI18n({ useScope: 'global' })
