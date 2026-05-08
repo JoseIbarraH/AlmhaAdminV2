@@ -1,6 +1,21 @@
 <script setup lang="ts">
-const { t } = useI18n({ useScope: 'global' })
+const { t, locale } = useI18n({ useScope: 'global' })
 const toast = useToast()
+
+const currentAboutLang = computed<'es' | 'en'>(() => {
+  const lang = locale.value.split('-')[0]
+  return lang === 'en' ? 'en' : 'es'
+})
+
+const currentAboutLangLabel = computed(() => (
+  currentAboutLang.value === 'en' ? 'English' : 'Español'
+))
+
+type AboutLangPayload = { title: string; description: string }
+type AboutField = { es: AboutLangPayload; en: AboutLangPayload }
+
+const emptyAboutLang = (): AboutLangPayload => ({ title: '', description: '' })
+const emptyAboutField = (): AboutField => ({ es: emptyAboutLang(), en: emptyAboutLang() })
 
 const generalData = ref({
   phone: '',
@@ -11,8 +26,24 @@ const generalData = ref({
     message: '',
     show_button: true,
     open_new_tab: true
-  }
+  },
+  about_mission: emptyAboutField(),
+  about_vision: emptyAboutField()
 })
+
+const normalizeAboutField = (raw: unknown): AboutField => {
+  const source = (raw && typeof raw === 'object') ? raw as Record<string, unknown> : {}
+  const pickLang = (lang: 'es' | 'en'): AboutLangPayload => {
+    const langValue = source[lang]
+    if (!langValue || typeof langValue !== 'object') return emptyAboutLang()
+    const obj = langValue as Record<string, unknown>
+    return {
+      title: typeof obj.title === 'string' ? obj.title : '',
+      description: typeof obj.description === 'string' ? obj.description : ''
+    }
+  }
+  return { es: pickLang('es'), en: pickLang('en') }
+}
 
 const socialData = ref({
   facebook: '',
@@ -76,13 +107,15 @@ const fetchSettings = async () => {
     
     if (generalRes.success) {
       const waData = generalRes.data.whatsapp
-      generalData.value = { 
-        ...generalData.value, 
+      generalData.value = {
+        ...generalData.value,
         ...generalRes.data,
         whatsapp: {
           ...generalData.value.whatsapp,
           ...(typeof waData === 'object' && waData !== null ? waData : { number: waData || '' })
-        }
+        },
+        about_mission: normalizeAboutField(generalRes.data.about_mission),
+        about_vision: normalizeAboutField(generalRes.data.about_vision)
       }
     }
     if (socialRes.success) {
@@ -95,16 +128,33 @@ const fetchSettings = async () => {
   }
 }
 
+const buildAboutSourcePayload = (field: AboutField) => {
+  const lang = currentAboutLang.value
+  const source = field[lang]
+  return {
+    lang,
+    title: source.title,
+    description: source.description
+  }
+}
+
 const saveSettings = async (group: 'general' | 'social') => {
   saving.value = true
-  const data = group === 'general' ? generalData.value : socialData.value
-  
+  let payload: Record<string, unknown> = group === 'general'
+    ? { ...generalData.value }
+    : { ...socialData.value }
+
+  if (group === 'general') {
+    payload.about_mission = buildAboutSourcePayload(generalData.value.about_mission)
+    payload.about_vision  = buildAboutSourcePayload(generalData.value.about_vision)
+  }
+
   try {
     await useApi('/settings', {
       method: 'POST',
       body: {
         group,
-        settings: data
+        settings: payload
       }
     })
     toast.add({
@@ -112,6 +162,10 @@ const saveSettings = async (group: 'general' | 'social') => {
       color: 'success',
       icon: 'i-heroicons-check-circle'
     })
+    if (group === 'general') {
+      // Re-fetch so the editor reflects the auto-translated content for the other languages.
+      await fetchSettings()
+    }
   } catch (e) {
     console.error(`Error saving ${group} settings:`, e)
     toast.add({
@@ -229,6 +283,101 @@ onMounted(fetchSettings)
               :loading="saving" 
               icon="i-heroicons-check-circle-20-solid" 
               color="primary" 
+              variant="solid"
+              size="xl"
+              class="save-button"
+              @click="saveSettings('general')"
+            >
+              {{ $t('settings.actions.save') }}
+            </UButton>
+          </div>
+        </div>
+      </section>
+
+      <!-- About (Mission & Vision) Section -->
+      <section class="premium-card">
+        <div class="premium-card-header">
+          <div class="icon-orb orb-amber">
+            <UIcon name="i-heroicons-sparkles-solid" class="orb-icon" />
+          </div>
+          <div class="header-text">
+            <h2 class="card-title">{{ $t('settings.general.about_title') }}</h2>
+            <p class="card-subtitle">{{ $t('settings.general.about_subtitle') }}</p>
+          </div>
+        </div>
+
+        <div class="premium-card-body">
+          <div class="about-lang-bar">
+            <div class="about-lang-current">
+              <UIcon name="i-heroicons-language" class="about-lang-current-icon" />
+              <span>{{ $t('settings.general.about_editing_in', { lang: currentAboutLangLabel }) }}</span>
+            </div>
+            <p class="about-lang-hint">
+              {{ $t('settings.general.about_fr_hint') }}
+            </p>
+          </div>
+
+          <!-- Mission -->
+          <div class="about-block">
+            <div class="about-block-header">
+              <UIcon name="i-heroicons-bolt" class="about-block-icon" />
+              <h3 class="about-block-title">{{ $t('settings.general.mission_label') }}</h3>
+            </div>
+            <div class="responsive-grid single-column">
+              <UFormField :label="$t('settings.general.mission_title_label')" class="form-item">
+                <UInput
+                  v-model="generalData.about_mission[currentAboutLang].title"
+                  icon="i-heroicons-document-text"
+                  size="xl"
+                  class="premium-input"
+                  :placeholder="$t('settings.general.mission_title_placeholder')"
+                />
+              </UFormField>
+              <UFormField :label="$t('settings.general.mission_description_label')" class="form-item">
+                <UTextarea
+                  v-model="generalData.about_mission[currentAboutLang].description"
+                  :rows="4"
+                  size="xl"
+                  class="premium-input"
+                  :placeholder="$t('settings.general.mission_description_placeholder')"
+                />
+              </UFormField>
+            </div>
+          </div>
+
+          <!-- Vision -->
+          <div class="about-block">
+            <div class="about-block-header">
+              <UIcon name="i-heroicons-eye" class="about-block-icon" />
+              <h3 class="about-block-title">{{ $t('settings.general.vision_label') }}</h3>
+            </div>
+            <div class="responsive-grid single-column">
+              <UFormField :label="$t('settings.general.vision_title_label')" class="form-item">
+                <UInput
+                  v-model="generalData.about_vision[currentAboutLang].title"
+                  icon="i-heroicons-document-text"
+                  size="xl"
+                  class="premium-input"
+                  :placeholder="$t('settings.general.vision_title_placeholder')"
+                />
+              </UFormField>
+              <UFormField :label="$t('settings.general.vision_description_label')" class="form-item">
+                <UTextarea
+                  v-model="generalData.about_vision[currentAboutLang].description"
+                  :rows="4"
+                  size="xl"
+                  class="premium-input"
+                  :placeholder="$t('settings.general.vision_description_placeholder')"
+                />
+              </UFormField>
+            </div>
+          </div>
+
+          <div class="action-footer">
+            <UButton
+              :loading="saving"
+              icon="i-heroicons-check-circle-20-solid"
+              color="primary"
               variant="solid"
               size="xl"
               class="save-button"
@@ -406,6 +555,10 @@ onMounted(fetchSettings)
   background: rgba(139, 92, 246, 0.1);
 }
 
+.orb-amber {
+  background: rgba(160, 124, 40, 0.1);
+}
+
 .orb-icon {
   width: 26px;
   height: 26px;
@@ -572,5 +725,94 @@ onMounted(fetchSettings)
 .save-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 20px 25px -5px rgba(160, 124, 40, 0.3);
+}
+
+/* About (Mission & Vision) */
+.about-lang-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: rgba(160, 124, 40, 0.04);
+  border: 1px dashed rgba(160, 124, 40, 0.35);
+  border-radius: 16px;
+  margin-bottom: 1.75rem;
+}
+
+:root.dark .about-lang-bar {
+  background: rgba(212, 175, 55, 0.05);
+  border-color: rgba(212, 175, 55, 0.3);
+}
+
+.about-lang-current {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #513a31;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+:root.dark .about-lang-current {
+  color: #d4af37;
+}
+
+.about-lang-current-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.about-lang-hint {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+:root.dark .about-lang-hint {
+  color: #94a3b8;
+}
+
+.about-block {
+  border: 1px solid #f1f5f9;
+  border-radius: 20px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  background: #fdfdfd;
+}
+
+:root.dark .about-block {
+  border-color: #334155;
+  background: rgba(30, 41, 59, 0.4);
+}
+
+.about-block-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.25rem;
+}
+
+.about-block-icon {
+  color: #a07c28;
+  width: 22px;
+  height: 22px;
+}
+
+.about-block-title {
+  font-size: 1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #513a31;
+}
+
+:root.dark .about-block-title {
+  color: #d4af37;
 }
 </style>

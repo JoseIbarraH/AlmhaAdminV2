@@ -432,7 +432,21 @@
       "email": "Correo electrónico",
       "location": "Ubicación física",
       "whatsapp": "Número de WhatsApp",
-      "whatsapp_hint": "usa {tag} donde quieras que vaya el nombre de un procedimiento"
+      "whatsapp_hint": "usa {tag} donde quieras que vaya el nombre de un procedimiento",
+      "about_title": "Sobre Nosotros",
+      "about_subtitle": "Edita la misión y visión que se muestran en la página pública.",
+      "about_editing_in": "Editando en {lang}",
+      "about_fr_hint": "Los demás idiomas se generan automáticamente al guardar.",
+      "mission_label": "Misión",
+      "mission_title_label": "Título de la misión",
+      "mission_title_placeholder": "Ej: Nuestra Misión",
+      "mission_description_label": "Descripción de la misión",
+      "mission_description_placeholder": "Describe la misión de la clínica…",
+      "vision_label": "Visión",
+      "vision_title_label": "Título de la visión",
+      "vision_title_placeholder": "Ej: Nuestra Visión",
+      "vision_description_label": "Descripción de la visión",
+      "vision_description_placeholder": "Describe la visión de la clínica…"
     },
     "social": {
       "facebook": "Facebook URL",
