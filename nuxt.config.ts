@@ -5,6 +5,14 @@ export default defineNuxtConfig({
 
   css: ['~/css/global.css'],
 
+  app: {
+    head: {
+      link: [
+        { rel: 'icon', type: 'image/png', href: '/logo.png' }
+      ]
+    }
+  },
+
   modules: [
     '@nuxt/ui',
     '@pinia/nuxt',
