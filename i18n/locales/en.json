@@ -476,6 +476,7 @@
       "refresh": "Refresh"
     },
     "sections": {
+      "doctor_section_bg": "Doctor Section (Background Image)",
       "main_banner": "Main Banner (Carousel)",
       "alternate_main_banner": "Alternate Banner (Single Image)",
       "background_1": "Background 1",

@@ -250,6 +250,10 @@ const getModeIcon = (mode: string) => {
     default: return 'i-heroicons-photo'
   }
 }
+
+// Designs that are background-only and don't need title/subtitle inputs.
+const TEXTLESS_DESIGN_KEYS = new Set(['doctor_section_bg'])
+const hasTextFields = (key: string | null | undefined): boolean => !!key && !TEXTLESS_DESIGN_KEYS.has(key)
 </script>
 
 <template>
@@ -339,13 +343,13 @@ const getModeIcon = (mode: string) => {
               </div>
 
               <!-- Translations Form -->
-              <div class="item-content grow p-5 flex flex-col gap-4">
+              <div v-if="hasTextFields(design.key)" class="item-content grow p-5 flex flex-col gap-4">
                 <div class="flex items-center gap-2">
                   <UBadge color="neutral" variant="soft" size="xs" class="font-bold uppercase tracking-wider">
                     {{ locale === 'es' ? 'Español' : 'English' }}
                   </UBadge>
                 </div>
-                
+
                 <div class="space-y-4">
                   <UInput
                     :placeholder="$t('designs.labels.title')"

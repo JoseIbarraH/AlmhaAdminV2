@@ -476,6 +476,7 @@
       "refresh": "Actualizar"
     },
     "sections": {
+      "doctor_section_bg": "Sección Doctor (Imagen de Fondo)",
       "main_banner": "Banner Principal (Carrusel)",
       "alternate_main_banner": "Banner Alternativo (Imagen Única)",
       "background_1": "Fondo 1",
